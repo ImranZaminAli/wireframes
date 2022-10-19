@@ -15,7 +15,7 @@
 // 320 240
 #define WIDTH 1000
 #define HEIGHT 1000
-#define SCALE 400
+#define SCALE 1000
 
 using namespace std;
 
@@ -88,10 +88,11 @@ void getLineVariables(float &numberOfSteps, float &xStep, float &yStep, CanvasPo
 void line(DrawingWindow &window, CanvasPoint start, CanvasPoint finish, Colour colour){
 	float numberOfSteps, xStep, yStep;
 	getLineVariables(numberOfSteps, xStep, yStep, start, finish);
-	for(float i = 0.0f; i < numberOfSteps; i++){
+	//cout << numberOfSteps << endl;
+	for(float i = 0.0f; i <= round(numberOfSteps); i++){
 		float x = start.x + xStep * i;
 		float y = start.y + yStep * i;
-		uint32_t argb = (255 << 24) + (int(colour.red) << 16) + (int(colour.blue) << 8) + (int(colour.green));
+		uint32_t argb = (255 << 24) + (int(colour.red) << 16) + (int(colour.green) << 8) + (int(colour.blue));
 		window.setPixelColour(round(x), round(y), argb); 
 	}
 	
@@ -132,7 +133,7 @@ void orderTriPoints(CanvasTriangle &tri){
 
 CanvasPoint getScaledPoint(CanvasPoint a, CanvasPoint b, CanvasPoint c) {
 	float scale = (float)(a.y - b.y) / (float)(a.y - c.y);
-	float x = round((float)((c.x - a.x) * scale)) + a.x;
+	float x = (float)((c.x - a.x) * scale) + a.x;
 	b.x = x;
 	//CanvasPoint point = CanvasPoint(x, b.y);
 	return b;
@@ -143,45 +144,80 @@ uint32_t getArgb(Colour colour) {
 	return argb;
 }
 
+//void drawFilledTriangle(DrawingWindow& window, CanvasTriangle& tri, Colour& colour) {
+//	uint32_t argb = getArgb(colour);
+//	orderTriPoints(tri);
+//	CanvasPoint intersect = getScaledPoint(tri.v0(), tri.v1(), tri.v2());
+//	//int sign = (intersect.x > tri.v1().x) ? -1 : 1;
+//	
+//		cout << "here3\n";
+//		for (float y = tri.v0().y; y <= intersect.y; y++) {
+//
+//			float xStart = getScaledPoint(tri.v0(), CanvasPoint(0, y), tri.v2()).x;
+//			cout << xStart << endl;
+//			float xEnd = getScaledPoint(tri.v0(), CanvasPoint(0, y), tri.v1()).x;
+//			if (xEnd == INFINITY) {
+//				intersect = tri.v0();
+//				break;
+//			}
+//			/*for (int i = 0; i <= abs(xStart - xEnd); i++) {
+//				window.setPixelColour(xStart + i * sign, y, argb);
+//			}*/
+//
+//			for (float i = min(xStart, xEnd); i <= max(xStart, xEnd); i++) {
+//				window.setPixelColour(round(i), round(y), argb);
+//			}
+//		}
+//
+//		for (float y = intersect.y; y <= tri.v2().y; y++) {
+//
+//			float xStart = getScaledPoint(tri.v0(), CanvasPoint(0, y), tri.v2()).x;
+//			float xEnd = getScaledPoint(tri.v1(), CanvasPoint(0, y), tri.v2()).x;
+//			/*for (int i = 0; i <= abs(xStart - xEnd); i++) {
+//				window.setPixelColour(xStart + i * sign, y, argb);
+//			}*/
+//
+//			for (float i = min(xStart,xEnd); i <= max(xStart, xEnd); i++) {
+//				window.setPixelColour(round(i), round(y), argb);
+//			}
+//		}
+//	
+//
+//}
+
 void drawFilledTriangle(DrawingWindow& window, CanvasTriangle& tri, Colour& colour) {
 	uint32_t argb = getArgb(colour);
 	orderTriPoints(tri);
 	CanvasPoint intersect = getScaledPoint(tri.v0(), tri.v1(), tri.v2());
-	//int sign = (intersect.x > tri.v1().x) ? -1 : 1;
-	
-		cout << "here3\n";
-		for (float y = tri.v0().y; y <= intersect.y; y++) {
+	//if(intersect.x == INFINITY || intersect.y )
+	vector<float> left, right;
+	left = interpolateSingleFloats(round(tri.v0().x), round(intersect.x), abs(round( intersect.y - tri.v0().y)));
+	right = interpolateSingleFloats(round(tri.v0().x), round(tri.v1().x), abs(round( intersect.y - tri.v0().y)));
+	//cout << left.size() << endl;
+	for (int i = 0; i < round(left.size()) && left.size() != 0; i++) {
+		float y = tri.v0().y + i;
 
-			float xStart = getScaledPoint(tri.v0(), CanvasPoint(0, y), tri.v2()).x;
-			cout << xStart << endl;
-			float xEnd = getScaledPoint(tri.v0(), CanvasPoint(0, y), tri.v1()).x;
-			//cout << ""
-			if (xEnd == INFINITY) {
-				intersect = tri.v0();
-				break;
-			}
-			/*for (int i = 0; i <= abs(xStart - xEnd); i++) {
-				window.setPixelColour(xStart + i * sign, y, argb);
-			}*/
+		//line(window, CanvasPoint(left[i], y), CanvasPoint(right[i], y), colour);
 
-			for (float i = min(xStart, xEnd); i <= max(xStart, xEnd); i++) {
-				window.setPixelColour(round(i), round(y), argb);
-			}
+		for (float x = min(left[i], right[i]); x < max(left[i], right[i]); x++) {
+			window.setPixelColour(x, round(y), argb);
 		}
+	}
 
-		for (float y = intersect.y; y <= tri.v2().y; y++) {
+	left = interpolateSingleFloats( round(intersect.x), round(tri.v2().x), abs( round(intersect.y - tri.v2().y)));
+	right = interpolateSingleFloats( round(tri.v1().x), round(tri.v2().x) , abs( round(intersect.y - tri.v2().y)));
+	//cout << left.size() << endl;
+	for (int i = 0; i < round(left.size()) && left.size() != 0; i++) {
+		//cout << i << endl;
+		float y = round(tri.v1().y + i);
 
-			float xStart = getScaledPoint(tri.v0(), CanvasPoint(0, y), tri.v2()).x;
-			float xEnd = getScaledPoint(tri.v1(), CanvasPoint(0, y), tri.v2()).x;
-			/*for (int i = 0; i <= abs(xStart - xEnd); i++) {
-				window.setPixelColour(xStart + i * sign, y, argb);
-			}*/
+		//line(window, CanvasPoint(left[i], y), CanvasPoint(right[i], y), colour);
 
-			for (float i = min(xStart,xEnd); i <= max(xStart, xEnd); i++) {
-				window.setPixelColour(round(i), round(y), argb);
-			}
+		for (float x = min(left[i], right[i]); x < max(left[i], right[i]); x++) {
+			window.setPixelColour(x, round(y), argb);
 		}
-	
+	}
+
 
 }
 
@@ -194,26 +230,15 @@ void drawTriangle(DrawingWindow &window){
 		int y = rand() % window.height;
 		points[i] = CanvasPoint(x,y);
 	}
-	//// (104.569, 160.75, 0) 1(164.355, 220.229, 0) 1(104.566, 222.512, 0) 1
-	// (181.591, 28.8966, 0) 1(137.354, 24.708, 0) 1(182.577, 24.708, 0) 1
-	/*points[0] = CanvasPoint(round(104.569), round(160.75));
-	points[1] = CanvasPoint(round(164.355), round(220.229));
-	points[2] = CanvasPoint(round(104.566), round(222.512));*/
+	
 	Colour colour;
 	randomColour(colour);
 
 
-	/*points[0] = CanvasPoint(round(104.569), round(160.75));
-	points[1] = CanvasPoint(round(164.355), round(222.229));
-	points[2] = CanvasPoint(round(104.566), round(222.12));*/
-
-	/*points[0] = CanvasPoint((104.569), (160.75));
-	points[1] = CanvasPoint((164.355), (222.229));
-	points[2] = CanvasPoint((104.566), (222.12));*/
+	
 
 	tri = CanvasTriangle(points[0], points[1], points[2]);
 	drawFilledTriangle(window, tri, colour);
-	//drawStrokedTriangle(window, tri);
 }
 
 void drawPoints(DrawingWindow& window) {
@@ -249,14 +274,7 @@ CanvasPoint getScaledCoord(glm::vec3 vertex) {
 void draw(DrawingWindow& window, ModelTriangle& tri, int i) {
 	// get the equivalent canvas points in a canvasTriangle
 	CanvasTriangle triCan = CanvasTriangle(getScaledCoord(tri.vertices[0]), getScaledCoord(tri.vertices[1]), getScaledCoord(tri.vertices[2]));
-	// draw 
 
-	//drawStrokedTriangle(window, triCan);
-	//cout << triCan << endl;
-	if (i == 5) {
-		//drawFilledTriangle(window, triCan, Colour(200,200,200));
-	}
-	//if(i == 1)
 	drawFilledTriangle(window, triCan, tri.colour);
 }
 
@@ -299,13 +317,10 @@ int main(int argc, char *argv[]) {
 	SDL_Event event;
 	Parser parser = Parser();
 	for (int i = 0; i < parser.triangles.size(); i++) {
-		//cout << parser.triangles[i] <<  " " << parser.triangles[i].colour << endl;
-		//cout << parser.triangles[i].colour << endl;
+		
 		draw(window, parser.triangles[i], i);
 	}
-	//draw(window, parser.triangles[14]);
-	//drawTriangle(window);
-	//drawTriangle(window);
+	
 	window.renderFrame();
 	while (true) {
 		// We MUST poll for events - otherwise the window will freeze !
