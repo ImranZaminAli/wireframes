@@ -15,7 +15,7 @@
 // 320 240
 #define WIDTH 1000
 #define HEIGHT 1000
-#define SCALE 1000
+#define SCALE 500
 
 using namespace std;
 
@@ -89,7 +89,7 @@ void line(DrawingWindow &window, CanvasPoint start, CanvasPoint finish, Colour c
 	float numberOfSteps, xStep, yStep;
 	getLineVariables(numberOfSteps, xStep, yStep, start, finish);
 	//cout << numberOfSteps << endl;
-	for(float i = 0.0f; i <= round(numberOfSteps); i++){
+	for(float i = 0.0f; i < numberOfSteps; i++){
 		float x = start.x + xStep * i;
 		float y = start.y + yStep * i;
 		uint32_t argb = (255 << 24) + (int(colour.red) << 16) + (int(colour.green) << 8) + (int(colour.blue));
