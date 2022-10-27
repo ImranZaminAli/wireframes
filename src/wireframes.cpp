@@ -95,23 +95,27 @@ uint32_t getArgb(Colour colour) {
     return argb;
 }
 
-void getLineVariables(float &numberOfSteps, float &xStep, float &yStep, CanvasPoint start, CanvasPoint finish){
+void getLineVariables(float &numberOfSteps, float &xStep, float &yStep, float &depthStep, CanvasPoint start, CanvasPoint finish){
 	float xDiff = finish.x - start.x;
 	float yDiff = finish.y - start.y;
-	numberOfSteps = max(abs(xDiff), abs(yDiff));
+    float depthDiff = finish.depth - start.depth;
+	numberOfSteps = max(max(abs(xDiff), abs(yDiff)), abs(depthDiff));
+
 	xStep = xDiff / numberOfSteps;
 	yStep = yDiff / numberOfSteps;
+    depthStep = depthDiff / numberOfSteps;
 }
 
 void line(DrawingWindow &window, CanvasPoint start, CanvasPoint finish, Colour colour){
-	float numberOfSteps, xStep, yStep;
-	getLineVariables(numberOfSteps, xStep, yStep, start, finish);
+	float numberOfSteps, xStep, yStep, depthStep;
+	getLineVariables(numberOfSteps, xStep, yStep, depthStep, start, finish);
 	for(float i = 0.0f; i < numberOfSteps; i++){
 		float x = start.x + xStep * i;
 		float y = start.y + yStep * i;
+        float depth = start.depth + depthStep * i;
 		uint32_t argb = getArgb(colour);
-
-		window.setPixelColour(ceil(x), floor(y), argb);
+        if(checkAndUpdateBuffer(ceil(x), floor(y), depth))
+		    window.setPixelColour(ceil(x), floor(y), argb);
 	}
 	
 }
@@ -152,7 +156,9 @@ void orderTriPoints(CanvasTriangle &tri){
 CanvasPoint getScaledPoint(CanvasPoint a, CanvasPoint b, CanvasPoint c) {
 	float scale = (float)(a.y - b.y) / (float)(a.y - c.y);
 	float x = round((float)((c.x - a.x) * scale)) + a.x;
+    float depth = (float)((c.depth - a.depth) * scale) + a.depth;
 	b.x = x;
+    b.depth = depth;
 	return b;
 }
 
