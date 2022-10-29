@@ -24,6 +24,10 @@ CanvasPoint &CanvasTriangle::operator[](size_t i) {
     return vertices[i];
 }
 
+//void CanvasTriangle::draw(void *method(DrawingWindow&, CanvasTriangle, Colour&), DrawingWindow& window, Colour& colour){
+//    method(window, this, colour);
+//}
+
 std::ostream &operator<<(std::ostream &os, const CanvasTriangle &triangle) {
 	os << triangle[0] << triangle[1] << triangle[2];
 	return os;
