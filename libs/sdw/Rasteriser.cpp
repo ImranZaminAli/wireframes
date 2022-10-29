@@ -38,7 +38,7 @@ bool Rasteriser::checkAndUpdateBuffer(float x, float y, float depth) {
 void Rasteriser::drawLine(DrawingWindow &window, CanvasPoint &start, CanvasPoint &finish, Colour &colour) {
     float numberOfSteps, xStep, yStep, depthStep;
     getLineVariables(numberOfSteps, xStep, yStep, depthStep, start, finish);
-    for(float i = 0.0f; i < numberOfSteps; i++){
+    for(float i = 0.0f; i <= numberOfSteps; i++){
         float x = start.x + xStep * i;
         float y = start.y + yStep * i;
         float depth = start.depth + depthStep * i;
