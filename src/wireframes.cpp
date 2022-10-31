@@ -15,6 +15,7 @@
 #include <array>
 #include <Camera.h>
 #include <Rasteriser.h>
+#include <Direction.cpp>
 // 320 240
 #define WIDTH 1000
 #define HEIGHT 1000
@@ -22,9 +23,11 @@
 
 using namespace std;
 
-array<array<float, WIDTH>, HEIGHT> buffer {};
+//array<array<float, WIDTH>, HEIGHT> buffer {};
 Camera camera = Camera();
-Rasteriser rasteriser = Rasteriser(buffer);
+Rasteriser rasteriser = Rasteriser();
+Parser parser = Parser();
+
 
 vector<float> interpolateSingleFloats(float from, float to, size_t numberOfValues){
 	vector<float> result;
@@ -107,26 +110,40 @@ CanvasPoint getCanvasIntersectionPoint(glm::vec3 vertexPos) {
 	float x, y, depth;
     //glm::vec3 cameraPos = glm::vec3(0,0,3);
     //float focalLength = 2;
-	x = -camera.focalLength * SCALE * (vertexPos[0] / (vertexPos[2] - camera.position[2])) + (WIDTH / 2);
-	y = camera.focalLength * SCALE * (vertexPos[1] / (vertexPos[2] - camera.position[2])) + (HEIGHT / 2);
+    x = -camera.focalLength * SCALE * ((vertexPos[0] - camera.position[0]) / (vertexPos[2] - camera.position[2])) + (WIDTH / 2);
+    y = camera.focalLength * SCALE * ((vertexPos[1] - camera.position[1])/ (vertexPos[2] - camera.position[2])) + (HEIGHT / 2);
+	//x = -camera.focalLength * SCALE * (vertexPos[0] / (vertexPos[2] - camera.position[2])) + (WIDTH / 2);
+	//y = camera.focalLength * SCALE * (vertexPos[1] / (vertexPos[2] - camera.position[2])) + (HEIGHT / 2);
     depth = camera.position[2] - vertexPos[2];
 	return CanvasPoint(x, y, depth);
 
 }
 
-void draw(DrawingWindow& window, ModelTriangle& tri) {
+void drawTriangle(DrawingWindow& window, ModelTriangle& tri, array<array<float, HEIGHT>, WIDTH>& buffer) {
 	CanvasTriangle triCan = CanvasTriangle(getCanvasIntersectionPoint(tri.vertices[0]), getCanvasIntersectionPoint(tri.vertices[1]), getCanvasIntersectionPoint(tri.vertices[2]));
     orderTriPoints(triCan);
-    rasteriser.drawFilledTriangle(window, triCan, tri.colour);
-    rasteriser.drawStrokedTriangle(window, triCan, tri.colour);
+    rasteriser.drawFilledTriangle(window, triCan, tri.colour, buffer);
+    rasteriser.drawStrokedTriangle(window, triCan, tri.colour, buffer);
+}
+
+void draw(DrawingWindow& window){
+    array<array<float, WIDTH>, HEIGHT> buffer {};
+    for (int i = 0; i < parser.triangles.size(); i++) {
+        drawTriangle(window, parser.triangles[i], buffer);
+    }
 }
 
 void handleEvent(SDL_Event event, DrawingWindow &window) {
-	if (event.type == SDL_KEYDOWN) {
-		if (event.key.keysym.sym == SDLK_LEFT) std::cout << "LEFT" << std::endl;
-		else if (event.key.keysym.sym == SDLK_RIGHT) std::cout << "RIGHT" << std::endl;
-		else if (event.key.keysym.sym == SDLK_UP) std::cout << "UP" << std::endl;
-		else if (event.key.keysym.sym == SDLK_DOWN) std::cout << "DOWN" << std::endl;
+    float stepSize = 0.2;
+    window.clearPixels();
+    if (event.type == SDL_KEYDOWN) {
+		if (event.key.keysym.sym == SDLK_LEFT) {camera.translateObject(Direction::right, -stepSize); draw(window);}
+		else if (event.key.keysym.sym == SDLK_RIGHT) {camera.translateObject(Direction::right, stepSize); draw(window);}
+		else if (event.key.keysym.sym == SDLK_UP) {camera.translateObject(Direction::up, stepSize); draw(window);}
+		else if (event.key.keysym.sym == SDLK_DOWN) {camera.translateObject(Direction::up, -stepSize); draw(window);}
+        else if (event.key.keysym.sym == SDLK_w) {camera.translateObject(Direction::forwards, stepSize); draw(window);}
+		else if (event.key.keysym.sym == SDLK_s) {camera.translateObject(Direction::forwards, -stepSize); draw(window);}
+        window.renderFrame();
 	} else if (event.type == SDL_MOUSEBUTTONDOWN) {
 		window.savePPM("output.ppm");
 		window.saveBMP("output.bmp");
@@ -140,10 +157,8 @@ int main(int argc, char *argv[]) {
 
 	DrawingWindow window = DrawingWindow(WIDTH, HEIGHT, false);
 	SDL_Event event;
-	Parser parser = Parser();
-	for (int i = 0; i < parser.triangles.size(); i++) {
-		draw(window, parser.triangles[i]);
-	}
+
+	draw(window);
 	window.renderFrame();
 	while (true) {
 		// We MUST poll for events - otherwise the window will freeze !

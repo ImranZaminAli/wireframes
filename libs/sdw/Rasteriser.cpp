@@ -1,10 +1,7 @@
 #include "Rasteriser.h"
 
 
-Rasteriser::Rasteriser(std::array<std::array<float, WIDTH>, HEIGHT>& buff) {
-    buffer = buff;
-}
-
+Rasteriser::Rasteriser() = default;
 void Rasteriser::getLineVariables(float &numberOfSteps, float &xStep, float &yStep, float &depthStep, CanvasPoint start, CanvasPoint finish) {
     float xDiff = finish.x - start.x;
     float yDiff = finish.y - start.y;
@@ -25,7 +22,7 @@ CanvasPoint Rasteriser::getScaledPoint(CanvasPoint a, CanvasPoint b, CanvasPoint
     return b;
 }
 
-bool Rasteriser::checkAndUpdateBuffer(float x, float y, float depth) {
+bool Rasteriser::checkAndUpdateBuffer(float x, float y, float depth, std::array<std::array<float, WIDTH>, HEIGHT> &buffer) {
     float reciprocal = 1/depth;
     if(buffer[y][x] == 0 || reciprocal > buffer[y][x]){
         buffer[y][x] = reciprocal;
@@ -35,25 +32,25 @@ bool Rasteriser::checkAndUpdateBuffer(float x, float y, float depth) {
     return false;
 }
 
-void Rasteriser::drawLine(DrawingWindow &window, CanvasPoint &start, CanvasPoint &finish, Colour &colour) {
+void Rasteriser::drawLine(DrawingWindow &window, CanvasPoint &start, CanvasPoint &finish, Colour &colour, std::array<std::array<float, WIDTH>, HEIGHT> &buffer) {
     float numberOfSteps, xStep, yStep, depthStep;
     getLineVariables(numberOfSteps, xStep, yStep, depthStep, start, finish);
     for(float i = 0.0f; i <= numberOfSteps; i++){
         float x = start.x + xStep * i;
         float y = start.y + yStep * i;
         float depth = start.depth + depthStep * i;
-        if(checkAndUpdateBuffer(ceil(x), floor(y), depth))
-            window.setPixelColour(ceil(x), floor(y), colour.getArbg());
+        if(checkAndUpdateBuffer(floor(x), ceil(y), depth, buffer))
+            window.setPixelColour(floor(x), ceil(y), colour.getArbg());
     }
 }
 
-void Rasteriser::drawStrokedTriangle(DrawingWindow &window, CanvasTriangle &tri, Colour &colour) {
-    drawLine(window, tri.v0(), tri.v1(), colour);
-    drawLine(window, tri.v1(), tri.v2(), colour);
-    drawLine(window, tri.v0(), tri.v2(), colour);
+void Rasteriser::drawStrokedTriangle(DrawingWindow &window, CanvasTriangle &tri, Colour &colour, std::array<std::array<float, WIDTH>, HEIGHT> &buffer) {
+    drawLine(window, tri.v0(), tri.v1(), colour, buffer);
+    drawLine(window, tri.v1(), tri.v2(), colour, buffer);
+    drawLine(window, tri.v0(), tri.v2(), colour, buffer);
 }
 
-void Rasteriser::drawFilledTriangle(DrawingWindow &window, CanvasTriangle &tri, Colour &colour) {
+void Rasteriser::drawFilledTriangle(DrawingWindow &window, CanvasTriangle &tri, Colour &colour, std::array<std::array<float, WIDTH>, HEIGHT> &buffer) {
     CanvasPoint intersect = getScaledPoint(tri.v0(), tri.v1(), tri.v2());
 
     for (float y = tri.v0().y; y <= intersect.y; y++) {
@@ -63,12 +60,12 @@ void Rasteriser::drawFilledTriangle(DrawingWindow &window, CanvasTriangle &tri, 
             intersect = tri.v0();
             break;
         }
-        drawLine(window, start, end, colour);
+        drawLine(window, start, end, colour, buffer);
     }
 
     for (float y = intersect.y; y <= tri.v2().y; y++) {
         CanvasPoint start = getScaledPoint(tri.v0(), CanvasPoint(0, y), tri.v2());
         CanvasPoint end = getScaledPoint(tri.v1(), CanvasPoint(0, y), tri.v2());
-        drawLine(window, start, end, colour);
+        drawLine(window, start, end, colour, buffer);
     }
 }
