@@ -41,7 +41,7 @@ vector<float> interpolateSingleFloats(float from, float to, size_t numberOfValue
 	return result;
 }
 
-vector<glm::vec3> interpolateThreeElementValues(glm::vec3 from, glm::vec3 to, size_t numberOfValues){ // todo run, test and debug this function
+vector<glm::vec3> interpolateThreeElementValues(glm::vec3 from, glm::vec3 to, size_t numberOfValues){
 	vector<glm::vec3> result;
 	for(int i = 0; i < numberOfValues; i++){
 		glm::vec3 v = glm::vec3(0,0,0);
@@ -110,11 +110,14 @@ CanvasPoint getCanvasIntersectionPoint(glm::vec3 vertexPos) {
 	float x, y, depth;
     //glm::vec3 cameraPos = glm::vec3(0,0,3);
     //float focalLength = 2;
-    x = -camera.focalLength * SCALE * ((vertexPos[0] - camera.position[0]) / (vertexPos[2] - camera.position[2])) + (WIDTH / 2);
-    y = camera.focalLength * SCALE * ((vertexPos[1] - camera.position[1])/ (vertexPos[2] - camera.position[2])) + (HEIGHT / 2);
-	//x = -camera.focalLength * SCALE * (vertexPos[0] / (vertexPos[2] - camera.position[2])) + (WIDTH / 2);
-	//y = camera.focalLength * SCALE * (vertexPos[1] / (vertexPos[2] - camera.position[2])) + (HEIGHT / 2);
-    depth = camera.position[2] - vertexPos[2];
+    //cout << camera.adjustedPos[0] << " " << camera.adjustedPos[1] << " " << camera.adjustedPos[2] << endl;
+    x = -camera.focalLength * SCALE * ((vertexPos[0] - camera.adjustedPos[0]) / (vertexPos[2] - camera.adjustedPos[2])) + (WIDTH / 2);
+    y = camera.focalLength * SCALE * ((vertexPos[1] - camera.adjustedPos[1])/ (vertexPos[2] - camera.adjustedPos[2])) + (HEIGHT / 2);
+
+    //x = -camera.focalLength * SCALE * ((vertexPos[0] - camera.position[0]) / (vertexPos[2] - camera.position[2])) + (WIDTH / 2);
+    //y = camera.focalLength * SCALE * ((vertexPos[1] - camera.position[1])/ (vertexPos[2] - camera.position[2])) + (HEIGHT / 2);
+
+    depth = camera.adjustedPos[2] - vertexPos[2];
 	return CanvasPoint(x, y, depth);
 
 }
@@ -135,14 +138,19 @@ void draw(DrawingWindow& window){
 
 void handleEvent(SDL_Event event, DrawingWindow &window) {
     float stepSize = 0.2;
+    float angle = glm::radians(2.5);
     window.clearPixels();
     if (event.type == SDL_KEYDOWN) {
-		if (event.key.keysym.sym == SDLK_LEFT) {camera.translateObject(Direction::right, -stepSize); draw(window);}
-		else if (event.key.keysym.sym == SDLK_RIGHT) {camera.translateObject(Direction::right, stepSize); draw(window);}
-		else if (event.key.keysym.sym == SDLK_UP) {camera.translateObject(Direction::up, stepSize); draw(window);}
-		else if (event.key.keysym.sym == SDLK_DOWN) {camera.translateObject(Direction::up, -stepSize); draw(window);}
-        else if (event.key.keysym.sym == SDLK_w) {camera.translateObject(Direction::forwards, stepSize); draw(window);}
-		else if (event.key.keysym.sym == SDLK_s) {camera.translateObject(Direction::forwards, -stepSize); draw(window);}
+		if (event.key.keysym.sym == SDLK_LEFT) {camera.moveCamera(Direction::right, -stepSize);}
+		else if (event.key.keysym.sym == SDLK_RIGHT) {camera.moveCamera(Direction::right, stepSize); }
+		else if (event.key.keysym.sym == SDLK_UP) {camera.moveCamera(Direction::up, stepSize); }
+		else if (event.key.keysym.sym == SDLK_DOWN) {camera.moveCamera(Direction::up, -stepSize); }
+        else if (event.key.keysym.sym == SDLK_w) {camera.moveCamera(Direction::forwards, stepSize); }
+		else if (event.key.keysym.sym == SDLK_s) {camera.moveCamera(Direction::forwards, -stepSize);}
+        else if (event.key.keysym.sym == SDLK_a) {camera.moveCamera(Direction::rotateX, angle);}
+		else if (event.key.keysym.sym == SDLK_d) {camera.moveCamera(Direction::rotateY, angle);}
+        camera.adjustedPos = camera.position * camera.orientation;
+        draw(window);
         window.renderFrame();
 	} else if (event.type == SDL_MOUSEBUTTONDOWN) {
 		window.savePPM("output.ppm");
