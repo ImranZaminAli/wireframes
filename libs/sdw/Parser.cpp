@@ -5,7 +5,8 @@ using namespace std;
 Parser::Parser() {
 	unordered_map<string, Colour> colours;
 	string nextLine;
-	ifstream mtlStream("cornell-box.mtl", ifstream::binary);
+	//ifstream mtlStream("cornell-box.mtl", ifstream::binary);
+	ifstream mtlStream("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\cornell-box.mtl", ifstream::binary);
 	string currentColour;
 	
 	while (getline(mtlStream, nextLine)) {
@@ -19,7 +20,8 @@ Parser::Parser() {
 			colours[currentColour] = colour;
 		}
 	}
-	ifstream objStream("cornell-box.obj", ifstream::binary);
+	ifstream objStream("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\cornell-box.obj", ifstream::binary);
+	//ifstream objStream("cornell-box.obj", ifstream::binary);
 	
 	Colour colour;
 	while (getline(objStream, nextLine)) {

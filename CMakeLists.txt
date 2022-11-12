@@ -36,7 +36,9 @@ add_executable(wireframes
         libs/sdw/TexturePoint.cpp
         libs/sdw/Utils.cpp
         libs/sdw/Parser.cpp
-        src/wireframes.cpp "libs/sdw/Parser.cpp" "libs/sdw/Parser.h")
+        libs/sdw/Rasteriser.cpp
+        libs/sdw/Camera.cpp
+        src/wireframes.cpp "libs/sdw/Parser.cpp" "libs/sdw/Parser.h" )
 
 if (MSVC)
     target_compile_options(wireframes
