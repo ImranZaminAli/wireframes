@@ -5,9 +5,9 @@
 #include "Colour.h"
 #include <cmath>
 #include <array>
-#define WIDTH 1000
-#define HEIGHT 1000
-
+#define WIDTH 500
+#define HEIGHT 500
+// -4.76395
 class Rasteriser{
     void getLineVariables(float &numberOfSteps, float &xStep, float &yStep, float &depthStep, CanvasPoint start, CanvasPoint finish);
     CanvasPoint getScaledPoint(CanvasPoint a, CanvasPoint b, CanvasPoint c);

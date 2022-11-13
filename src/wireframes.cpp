@@ -16,9 +16,10 @@
 #include <Camera.h>
 #include <Rasteriser.h>
 #include <Direction.cpp>
+#include <RayTracer.h>
 // 320 240
-#define WIDTH 1000
-#define HEIGHT 1000
+#define WIDTH 500
+#define HEIGHT 500
 #define SCALE 400
 
 using namespace std;
@@ -27,7 +28,9 @@ using namespace std;
 Camera camera = Camera();
 Rasteriser rasteriser = Rasteriser();
 Parser parser = Parser();
+RayTracer rayTracer = RayTracer(WIDTH, HEIGHT);
 array<array<float, WIDTH>, HEIGHT> buffer{};
+
 
 
 vector<float> interpolateSingleFloats(float from, float to, size_t numberOfValues){
@@ -109,18 +112,11 @@ void orderTriPoints(CanvasTriangle &tri){
 
 CanvasPoint getCanvasIntersectionPoint(glm::vec3 vertexPos) {
 	float x, y, depth;
-    //glm::vec3 cameraPos = glm::vec3(0,0,3);
-    //float focalLength = 2;
-    //cout << camera.adjustedPos[0] << " " << camera.adjustedPos[1] << " " << camera.adjustedPos[2] << endl;
     glm::vec3 intersection = (vertexPos - camera.position) * camera.orientation;
     x = -camera.focalLength * SCALE * (intersection[0] / intersection[2]) + (WIDTH / 2);
     y = camera.focalLength * SCALE * (intersection[1] / intersection[2]) + (HEIGHT / 2);
 
-    //x = -camera.focalLength * SCALE * ((vertexPos[0] - camera.position[0]) / (vertexPos[2] - camera.position[2])) + (WIDTH / 2);
-    //y = camera.focalLength * SCALE * ((vertexPos[1] - camera.position[1])/ (vertexPos[2] - camera.position[2])) + (HEIGHT / 2);
-
-    //depth = camera.adjustedPos[2] - vertexPos[2];
-     depth = camera.focalLength * (intersection[2]);
+    depth = camera.focalLength * (intersection[2]);
     return CanvasPoint(x, y, depth);
 
 }
@@ -163,7 +159,8 @@ void handleEvent(SDL_Event event, DrawingWindow &window) {
 		else if (event.key.keysym.sym == SDLK_d) {camera.moveCamera(Direction::rotateY, angle);}
 		//camera.lookAt();
         
-        draw(window);
+        //draw(window);
+		rayTracer.drawRayTracedImage(&window, &parser.triangles, &camera);
         window.renderFrame();
 	} else if (event.type == SDL_MOUSEBUTTONDOWN) {
 		window.savePPM("output.ppm");
@@ -178,13 +175,16 @@ int main(int argc, char *argv[]) {
 
 	DrawingWindow window = DrawingWindow(WIDTH, HEIGHT, false);
 	SDL_Event event;
-	draw(window);
+	//draw(window);
 
 	//array<array<float, WIDTH>, HEIGHT> buffer{};
 	//for (int i = 0; i < parser.triangles.size(); i++) {
 	//	cout << i << endl;
 	//	drawTriangle(window, parser.triangles[i], buffer);
 	//}
+	//bool method = false;
+	
+	rayTracer.drawRayTracedImage(&window, &parser.triangles, &camera);
 
 
 	window.renderFrame();
