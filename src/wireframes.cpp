@@ -18,9 +18,9 @@
 #include <Direction.cpp>
 #include <RayTracer.h>
 // 320 240
-#define WIDTH 500
-#define HEIGHT 500
-#define SCALE 400
+#define WIDTH 400
+#define HEIGHT 400
+#define SCALE 300
 
 using namespace std;
 
@@ -30,6 +30,7 @@ Rasteriser rasteriser = Rasteriser();
 Parser parser = Parser();
 RayTracer rayTracer = RayTracer(WIDTH, HEIGHT);
 array<array<float, WIDTH>, HEIGHT> buffer{};
+bool renderOption = true; // true for rasterise and false for ray trace
 
 
 
@@ -157,10 +158,11 @@ void handleEvent(SDL_Event event, DrawingWindow &window) {
 		else if (event.key.keysym.sym == SDLK_s) {camera.moveCamera(Direction::forwards, -stepSize);}
         else if (event.key.keysym.sym == SDLK_a) {camera.moveCamera(Direction::rotateX, angle);}
 		else if (event.key.keysym.sym == SDLK_d) {camera.moveCamera(Direction::rotateY, angle);}
+		else if (event.key.keysym.sym == SDLK_p) { renderOption = !renderOption; }
 		//camera.lookAt();
         
         //draw(window);
-		rayTracer.drawRayTracedImage(&window, &parser.triangles, &camera);
+		renderOption? draw(window) : rayTracer.drawRayTracedImage(&window, &parser.triangles, &camera);
         window.renderFrame();
 	} else if (event.type == SDL_MOUSEBUTTONDOWN) {
 		window.savePPM("output.ppm");
@@ -185,7 +187,7 @@ int main(int argc, char *argv[]) {
 	//bool method = false;
 	
 	rayTracer.drawRayTracedImage(&window, &parser.triangles, &camera);
-
+	//draw(window);
 
 	window.renderFrame();
 	while (true) {
