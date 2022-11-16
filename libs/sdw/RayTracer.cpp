@@ -3,8 +3,7 @@
 RayTracer::RayTracer(int windowWidth, int windowHeight) {
 	width = windowWidth;
 	height = windowHeight;
-	//std::vector<ModelTriangle> tri = std::vector<ModelTriangle>();
-	
+	lightPoint = glm::vec3(0, 0.4, 0);
 	black = 0xFF000000;
 }
 
@@ -80,8 +79,6 @@ void RayTracer::trace(CanvasPoint& point) {
 		window->setPixelColour(point.x, point.y, rayData.intersectedTriangle.colour.getArbg());
 	else {
 		
-		
-		glm::vec3 lightPoint = glm::vec3(0, 0.4, 0);
 		rayDir = glm::normalize(rayData.intersectionPoint - lightPoint);
 		float dist = glm::distance(lightPoint, rayData.intersectionPoint);
 		

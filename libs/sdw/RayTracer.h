@@ -12,6 +12,7 @@ class RayTracer {
 	int width;
 	int height;
 	uint32_t black;
+	glm::vec3 lightPoint;
 	std::vector<ModelTriangle>* triangles;
 	Camera* camera;
 	DrawingWindow* window;
