@@ -3,9 +3,10 @@
 RayTracer::RayTracer(int windowWidth, int windowHeight) {
 	width = windowWidth;
 	height = windowHeight;
-	lightPoint = glm::vec3(0, 0.4, 0);
+	lightPoint = glm::vec3(0, 0.4, 0.2f);
+	//lightPoint = glm::vec3(0, 0.4, 0);
 	black = 0xFF000000;
-	sourceStrength = 13.0f;
+	sourceStrength = 50.0f;
 }
 
 glm::vec3 RayTracer::getRayDirection(CanvasPoint& point) {
@@ -70,35 +71,67 @@ void RayTracer::getClosestIntersection(glm::vec3 rayDir, RayTriangleIntersection
 	
 }
 
-float RayTracer::calculateIntensity(float distance){
-    float intensity = sourceStrength / (4 * M_PI * distance * distance);
-    return glm::clamp(intensity, 0.0f,1.0f);
+float RayTracer::calculateIntensity(float distance, glm::vec3 rayDir, int triIndex){
+	float dotProduct = glm::dot(rayDir, (*triangles)[triIndex].normal);
+	//std::cout << dotProduct << std::endl;
+    float intensity = (sourceStrength * dotProduct) / (4 * M_PI * distance * distance);
+	
+	return glm::clamp(intensity, 0.07f,1.0f);
+}
+
+float RayTracer::calculateIntensity(glm::vec3 cameraRay, glm::vec3 shadowRay, ModelTriangle& tri) {
+	glm::vec3 reflectedRay = glm::normalize(shadowRay - 2.0f * tri.normal * glm::dot(shadowRay, tri.normal));
+	float intensity = glm::dot(reflectedRay, cameraRay);
+	return std::powf(intensity, 20.0f);
+}
+
+float RayTracer::calculateIntensity(float distance, glm::vec3 cameraRay, glm::vec3 shadowRay, ModelTriangle& tri) {
+	glm::vec3 reflectedRay = glm::normalize(shadowRay - 2.0f * tri.normal * glm::dot(shadowRay, tri.normal));
+	float spectralVal = std::powf(glm::dot(reflectedRay, cameraRay), 64);
+	float incidenceVal = glm::dot(shadowRay, tri.normal);
+	float intensity = (sourceStrength * incidenceVal ) / (4 * M_PI * distance * distance);
+
+	return glm::clamp(intensity + spectralVal, 0.0f, 1.0f);
 }
 
 void RayTracer::trace(CanvasPoint& point) {
 	RayTriangleIntersection rayData;
-	glm::vec3 rayDir = getRayDirection(point);
-	getClosestIntersection(rayDir, rayData, camera->position, true);
-	if (rayData.distanceFromCamera == INFINITY)
+	glm::vec3 cameraRay = getRayDirection(point);
+	getClosestIntersection(cameraRay, rayData, camera->position, true);
+	//if (rayData.distanceFromCamera == INFINITY)
+	//	window->setPixelColour(point.x, point.y, black);
+	//else if (rayData.triangleIndex == 0 || rayData.triangleIndex == 1)
+	//	window->setPixelColour(point.x, point.y, rayData.intersectedTriangle.colour.getArbg());
+	//else {
+	//	
+	//	rayDir = glm::normalize(rayData.intersectionPoint - lightPoint);
+	//	float dist = glm::distance(lightPoint, rayData.intersectionPoint);
+	//	
+	//	RayTriangleIntersection shadowData;
+	//	getClosestIntersection(rayDir, shadowData, lightPoint, false);
+	//			
+	//	/*if (shadowData.distanceFromCamera < dist && rayData.triangleIndex != shadowData.triangleIndex) {
+	//		window->setPixelColour(point.x, point.y, black);
+	//	}
+	//	else {
+	//	    float intensity = calculateIntensity(rayData.distanceFromCamera, glm::normalize(rayDir), rayData.triangleIndex);
+	//		window->setPixelColour(point.x, point.y, shadowData.intersectedTriangle.colour.getArbg(intensity));
+	//	}*/
+	//	
+	//}
+
+	if (rayData.distanceFromCamera == INFINITY) {
 		window->setPixelColour(point.x, point.y, black);
-	else if (rayData.triangleIndex == 0 || rayData.triangleIndex == 1)
-		window->setPixelColour(point.x, point.y, rayData.intersectedTriangle.colour.getArbg());
+	}
 	else {
-		
-		rayDir = glm::normalize(rayData.intersectionPoint - lightPoint);
+		glm::vec3 shadowRay = glm::normalize(rayData.intersectionPoint - lightPoint);
 		float dist = glm::distance(lightPoint, rayData.intersectionPoint);
-		
-		RayTriangleIntersection shadowData;
-		getClosestIntersection(rayDir, shadowData, lightPoint, false);
-				
-		if (shadowData.distanceFromCamera < dist && rayData.triangleIndex != shadowData.triangleIndex) {
-			window->setPixelColour(point.x, point.y, black);
-		}
-		else {
-		    float intensity = calculateIntensity(rayData.distanceFromCamera);
-			window->setPixelColour(point.x, point.y, shadowData.intersectedTriangle.colour.getArbg(intensity));
-		}
-		
+		//RayTriangleIntersection shadowData;
+		//getClosestIntersection(rayDir, shadowData, lightPoint, false);
+		//float intensity = calculateIntensity(rayData.distanceFromCamera, shadowRay, rayData.triangleIndex);
+		//float intensity = calculateIntensity(glm::normalize(cameraRay), shadowRay, (*triangles)[rayData.triangleIndex]);
+		float intensity = calculateIntensity(rayData.distanceFromCamera, cameraRay, shadowRay, (*triangles)[rayData.triangleIndex]);
+		window->setPixelColour(point.x, point.y, rayData.intersectedTriangle.colour.getArbg(intensity));
 	}
 }
 

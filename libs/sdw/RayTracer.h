@@ -22,7 +22,9 @@ class RayTracer {
 	void getClosestIntersection(glm::vec3 rayDir, RayTriangleIntersection& rayData, glm::vec3 startPosition, bool first);
 	bool checkValid(float u, float v, float t);
 	void trace(CanvasPoint& point);
-	float calculateIntensity(float distance);
+	float calculateIntensity(float distance, glm::vec3 rayDir, int triIndex);
+	float calculateIntensity(glm::vec3 cameraRay, glm::vec3 shadowRay, ModelTriangle& tri);
+	float calculateIntensity(float distance, glm::vec3 cameraRay, glm::vec3 shadowRay, ModelTriangle& tri);
 	glm::vec3 getRayDirection(CanvasPoint& point);
 public:
 	RayTracer(int windowWidth, int windowHeight);
