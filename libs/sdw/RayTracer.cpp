@@ -5,6 +5,7 @@ RayTracer::RayTracer(int windowWidth, int windowHeight) {
 	height = windowHeight;
 	lightPoint = glm::vec3(0, 0.4, 0);
 	black = 0xFF000000;
+	sourceStrength = 13.0f;
 }
 
 glm::vec3 RayTracer::getRayDirection(CanvasPoint& point) {
@@ -69,6 +70,11 @@ void RayTracer::getClosestIntersection(glm::vec3 rayDir, RayTriangleIntersection
 	
 }
 
+float RayTracer::calculateIntensity(float distance){
+    float intensity = sourceStrength / (4 * M_PI * distance * distance);
+    return glm::clamp(intensity, 0.0f,1.0f);
+}
+
 void RayTracer::trace(CanvasPoint& point) {
 	RayTriangleIntersection rayData;
 	glm::vec3 rayDir = getRayDirection(point);
@@ -89,7 +95,8 @@ void RayTracer::trace(CanvasPoint& point) {
 			window->setPixelColour(point.x, point.y, black);
 		}
 		else {
-			window->setPixelColour(point.x, point.y, shadowData.intersectedTriangle.colour.getArbg());
+		    float intensity = calculateIntensity(rayData.distanceFromCamera);
+			window->setPixelColour(point.x, point.y, shadowData.intersectedTriangle.colour.getArbg(intensity));
 		}
 		
 	}
@@ -102,7 +109,8 @@ void RayTracer::drawRayTracedImage(DrawingWindow* window, std::vector<ModelTrian
 		
 	for (int i = 0; i < height; i++){
 		for (int j = 0; j < width; j++) {
-			trace(CanvasPoint(j,i, camera->focalLength));
+		    CanvasPoint point = CanvasPoint(j,i, camera->focalLength);
+			trace(point);
 		}
 	}
 

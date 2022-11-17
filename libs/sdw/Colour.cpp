@@ -19,3 +19,7 @@ std::ostream &operator<<(std::ostream &os, const Colour &colour) {
 uint32_t Colour::getArbg() {
     return (255 << 24) + (int(red) << 16) + (int(green) << 8) + (int(blue));
 }
+
+uint32_t Colour::getArbg(float intensity) {
+    return (255 << 24) + (int(red * intensity) << 16) + (int(green * intensity) << 8) + (int(blue * intensity));
+}

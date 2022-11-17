@@ -1,4 +1,4 @@
-#pragma once
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        #pragma once
 
 #include <glm/glm.hpp>
 #include <vector>
@@ -14,6 +14,7 @@ class RayTracer {
 	uint32_t black;
 	glm::vec3 lightPoint;
 	std::vector<ModelTriangle>* triangles;
+	float sourceStrength;
 	Camera* camera;
 	DrawingWindow* window;
 	glm::vec3 getPossibleSolution(int index, glm::vec3 rayDir, glm::vec3 startPosition);
@@ -21,6 +22,7 @@ class RayTracer {
 	void getClosestIntersection(glm::vec3 rayDir, RayTriangleIntersection& rayData, glm::vec3 startPosition, bool first);
 	bool checkValid(float u, float v, float t);
 	void trace(CanvasPoint& point);
+	float calculateIntensity(float distance);
 	glm::vec3 getRayDirection(CanvasPoint& point);
 public:
 	RayTracer(int windowWidth, int windowHeight);
