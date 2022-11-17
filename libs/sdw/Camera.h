@@ -1,6 +1,6 @@
 #pragma once
 #include "CanvasPoint.h"
-#include "Direction.cpp"
+#include "Enums.cpp"
 #include <cmath>
 #include <glm/glm.hpp>
 class Camera{

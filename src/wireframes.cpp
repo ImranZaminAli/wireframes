@@ -15,7 +15,7 @@
 #include <array>
 #include <Camera.h>
 #include <Rasteriser.h>
-#include <Direction.cpp>
+#include <Enums.cpp>
 #include <RayTracer.h>
 // 320 240
 #define WIDTH 400
@@ -30,8 +30,7 @@ Rasteriser rasteriser = Rasteriser();
 Parser parser = Parser();
 RayTracer rayTracer = RayTracer(WIDTH, HEIGHT);
 array<array<float, WIDTH>, HEIGHT> buffer{};
-bool renderOption = true; // true for rasterise and false for ray trace
-
+DrawMode mode = DrawMode::wireframe;
 
 
 vector<float> interpolateSingleFloats(float from, float to, size_t numberOfValues){
@@ -125,15 +124,42 @@ CanvasPoint getCanvasIntersectionPoint(glm::vec3 vertexPos) {
 void drawTriangle(DrawingWindow& window, ModelTriangle& tri, array<array<float, HEIGHT>, WIDTH>& buffer) {
 	CanvasTriangle triCan = CanvasTriangle(getCanvasIntersectionPoint(tri.vertices[0]), getCanvasIntersectionPoint(tri.vertices[1]), getCanvasIntersectionPoint(tri.vertices[2]));
     orderTriPoints(triCan);
-    rasteriser.drawFilledTriangle(window, triCan, tri.colour, buffer);
+	if(mode == DrawMode::fill)
+		rasteriser.drawFilledTriangle(window, triCan, tri.colour, buffer);
     rasteriser.drawStrokedTriangle(window, triCan, tri.colour, buffer);
 }
 
 void draw(DrawingWindow &window){
     //array<array<float, WIDTH>, HEIGHT> buffer {};
-    for (int i = 0; i < parser.triangles.size(); i++) {
-        drawTriangle(window, parser.triangles[i], buffer);
-    }
+
+	/*switch (mode)
+	{
+	case wireframe:
+		for (int i = 0; i < parser.triangles.size(); i++) {
+			
+		}
+		break;
+	case fill:
+		for (int i = 0; i < parser.triangles.size(); i++) {
+			drawTriangle(window, parser.triangles[i], buffer);
+		}
+		break;
+	case rayTrace:
+		break;
+	default:
+		break;
+	}*/
+
+	if (mode == DrawMode::wireframe || mode == DrawMode::fill) {
+		for (int i = 0; i < parser.triangles.size(); i++) {
+			drawTriangle(window, parser.triangles[i], buffer);
+		}
+	}
+	else {
+		rayTracer.drawRayTracedImage(&window, &parser.triangles, &camera);
+	}
+
+    
 }
 
 void emptyBuffer() {
@@ -142,6 +168,15 @@ void emptyBuffer() {
 			buffer[j][i] = 0;
 		}
 	}
+}
+
+void cycleMode() {
+	if (mode == DrawMode::wireframe)
+		mode = DrawMode::fill;
+	else if (mode == DrawMode::fill)
+		mode = DrawMode::rayTrace;
+	else
+		mode = DrawMode::wireframe;
 }
 
 void handleEvent(SDL_Event event, DrawingWindow &window) {
@@ -158,12 +193,13 @@ void handleEvent(SDL_Event event, DrawingWindow &window) {
 		else if (event.key.keysym.sym == SDLK_s) {camera.moveCamera(Direction::forwards, -stepSize);}
         else if (event.key.keysym.sym == SDLK_a) {camera.moveCamera(Direction::rotateX, angle);}
 		else if (event.key.keysym.sym == SDLK_d) {camera.moveCamera(Direction::rotateY, angle);}
-		else if (event.key.keysym.sym == SDLK_p) { renderOption = !renderOption; }
+		else if (event.key.keysym.sym == SDLK_p) { cycleMode(); }
 		//camera.lookAt();
         
         //draw(window);
-		renderOption? draw(window) : rayTracer.drawRayTracedImage(&window, &parser.triangles, &camera);
-        window.renderFrame();
+		//renderOption? draw(window) : rayTracer.drawRayTracedImage(&window, &parser.triangles, &camera);
+		draw(window);
+		window.renderFrame();
 	} else if (event.type == SDL_MOUSEBUTTONDOWN) {
 		window.savePPM("output.ppm");
 		window.saveBMP("output.bmp");
@@ -185,8 +221,8 @@ int main(int argc, char *argv[]) {
 	//	drawTriangle(window, parser.triangles[i], buffer);
 	//}
 	//bool method = false;
-	
-	rayTracer.drawRayTracedImage(&window, &parser.triangles, &camera);
+	draw(window);
+	//rayTracer.drawRayTracedImage(&window, &parser.triangles, &camera);
 	//draw(window);
 
 	window.renderFrame();
