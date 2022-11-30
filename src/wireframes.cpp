@@ -17,6 +17,8 @@
 #include <Rasteriser.h>
 #include <Enums.cpp>
 #include <RayTracer.h>
+#include <TexturePoint.h>
+
 // 320 240
 #define WIDTH 400
 #define HEIGHT 400
@@ -30,7 +32,7 @@ Rasteriser rasteriser = Rasteriser();
 Parser parser = Parser();
 RayTracer rayTracer = RayTracer(WIDTH, HEIGHT);
 array<array<float, WIDTH>, HEIGHT> buffer{};
-DrawMode mode = DrawMode::wireframe;
+DrawMode mode = DrawMode::rayTrace;
 
 
 vector<float> interpolateSingleFloats(float from, float to, size_t numberOfValues){
@@ -149,7 +151,6 @@ void draw(DrawingWindow &window){
 	default:
 		break;
 	}*/
-
 	if (mode == DrawMode::wireframe || mode == DrawMode::fill) {
 		for (int i = 0; i < parser.triangles.size(); i++) {
 			drawTriangle(window, parser.triangles[i], buffer);
@@ -210,7 +211,6 @@ void handleEvent(SDL_Event event, DrawingWindow &window) {
 int main(int argc, char *argv[]) {
 	// uncomment line below for proper random
 	//srand((unsigned int) time(NULL));
-
 	DrawingWindow window = DrawingWindow(WIDTH, HEIGHT, false);
 	SDL_Event event;
 	//draw(window);
@@ -221,9 +221,24 @@ int main(int argc, char *argv[]) {
 	//	drawTriangle(window, parser.triangles[i], buffer);
 	//}
 	//bool method = false;
-	draw(window);
-	//rayTracer.drawRayTracedImage(&window, &parser.triangles, &camera);
 	//draw(window);
+	//rayTracer.drawRayTracedImage(&window, &parser.triangles, &camera);
+	draw(window);
+	
+	/*CanvasPoint a = CanvasPoint(170, 10);
+	a.texturePoint = TexturePoint(195, 5);
+	
+	CanvasPoint b = CanvasPoint(250, 250);
+	b.texturePoint = TexturePoint(395, 380);
+
+	CanvasPoint c = CanvasPoint(10, 190);
+	c.texturePoint = TexturePoint(65, 330);
+
+	CanvasTriangle tri = CanvasTriangle(a, b, c);
+	orderTriPoints(tri);*/
+	//rasteriser.drawStrokedTriangle(window, tri, Colour(255,255,255), buffer);
+	//rasteriser.drawTexturedTriangle(window, tri, buffer);
+
 
 	window.renderFrame();
 	while (true) {

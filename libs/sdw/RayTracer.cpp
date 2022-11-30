@@ -3,10 +3,12 @@
 RayTracer::RayTracer(int windowWidth, int windowHeight) {
 	width = windowWidth;
 	height = windowHeight;
-	lightPoint = glm::vec3(0.4f, 0.4f, 0.0f);
+	//lightPoint = glm::vec3(0, 0.1, 0.0);
+	lightPoint = glm::vec3(0.35f, 0.3f, 0.0f);
 	//lightPoint = glm::vec3(0, 0.4, 0);
 	black = 0xFF000000;
-	sourceStrength = 8.0f;
+	sourceStrength = 2.0f;
+	textureMap = TextureMap("C:\\Users\\izami\\Documents\\UoBYr3\\Graphics\\wireframes\\texture.ppm");
 }
 
 glm::vec3 RayTracer::getRayDirection(CanvasPoint& point) {
@@ -38,21 +40,24 @@ bool RayTracer::checkValid(float u, float v, float t) {
 	checkV = (v >= 0.0f) && (v <= 1.0f);
 	checkSum = u + v <= 1.0f;
 
-	return checkU && checkV && checkSum && t > 0.0001;
+	return checkU && checkV && checkSum && t > 0.0000001;
 }
 
-glm::vec3 calculateIntersection(ModelTriangle triangle, float u, float v) {
+glm::vec3 RayTracer::calculateIntersection(ModelTriangle triangle, glm::vec3& pointNormal, float u, float v) {
 	glm::vec3 point = triangle.vertices[0];
 	
 	point += (triangle.vertices[1] - triangle.vertices[0]) * u;
 	point += (triangle.vertices[2] - triangle.vertices[0]) * v;
+	pointNormal = triangle.vertexNormals[0];
+	pointNormal += (triangle.vertexNormals[1] - triangle.vertexNormals[0]) * u;
+	pointNormal += (triangle.vertexNormals[2] - triangle.vertexNormals[0]) * v;
+	//pointNormal = glm::normalize(pointNormal);
 	//point[2] *= -1;
 	return point;
 }
 
-void RayTracer::getClosestIntersection(glm::vec3 rayDir, RayTriangleIntersection& rayData,glm::vec3 startPosition, bool first) {
+void RayTracer::getClosestIntersection(glm::vec3 rayDir, RayTriangleIntersection& rayData, glm::vec3& pointNormal, glm::vec3 startPosition, bool first) {
 	rayData.distanceFromCamera = INFINITY;
-	
 	for (int i = 0; i < triangles->size(); i++) {
 		glm::vec3 possibleSolution = getPossibleSolution(i, rayDir, startPosition);
 		bool valid = checkValid(possibleSolution[1], possibleSolution[2], possibleSolution[0]);
@@ -63,12 +68,12 @@ void RayTracer::getClosestIntersection(glm::vec3 rayDir, RayTriangleIntersection
 			rayData.intersectedTriangle = (*triangles)[i];
 			rayData.triangleIndex = i;
 			
-
-			rayData.intersectionPoint = calculateIntersection((*triangles)[i], possibleSolution[1], possibleSolution[2]);
+			
+			rayData.intersectionPoint = calculateIntersection((*triangles)[i], pointNormal, possibleSolution[1], possibleSolution[2]);
+			rayData.u = possibleSolution[1];
+			rayData.v = possibleSolution[2];
 		}
 	}
-
-	
 }
 
 float RayTracer::calculateIntensity(float distance, glm::vec3 rayDir, ModelTriangle& tri){
@@ -84,42 +89,65 @@ float RayTracer::calculateIntensity(glm::vec3 shadowRay, glm::vec3 cameraRay, Mo
 	return glm::clamp(std::powf(intensity, 256.0f), 0.0f, 1.0f);
 }
 
-float RayTracer::calculateIntensity(float distance, glm::vec3 cameraRay, glm::vec3 shadowRay, glm::vec3 viewRay, ModelTriangle& tri) {
-	
-	glm::vec3 reflectedRay = glm::normalize(shadowRay - 2.0f * tri.normal * glm::dot(shadowRay, tri.normal));
+float RayTracer::calculateIntensity(float distance, glm::vec3 cameraRay, glm::vec3 shadowRay, glm::vec3 viewRay, ModelTriangle& tri, glm::vec3 pointNormal) {
+	glm::vec3 reflectedRay = glm::normalize(shadowRay - 2.0f * pointNormal * glm::dot(shadowRay, -pointNormal));
 	float specularIntensity = std::powf(glm::dot(reflectedRay, viewRay), 256);
 	
-	float inidenceAngle = glm::dot(shadowRay, tri.normal);
-	float diffuseIntensity = inidenceAngle / (4 * M_PI * distance * distance);
-	float diffuseStrength = 8.0f;
+	float inidenceAngle = glm::dot(shadowRay, pointNormal);
+	float proximityStrength = 1.5f;
+	float proximityIntensity = 1/ (4 * M_PI * distance * distance);
+	float incidentStrength = 1.6f;
 	float specularStrength = 10.0f;
-	return glm::clamp(fmaxf(diffuseIntensity * diffuseStrength, specularIntensity * diffuseStrength), 0.0f, 1.0f);
+	float diffuseIntensity = fmaxf(proximityIntensity * proximityStrength, incidentStrength * inidenceAngle);
+	return glm::clamp(specularIntensity * specularStrength + incidentStrength * inidenceAngle + proximityIntensity * proximityStrength, 0.0f, 1.0f);
 }
 
 void RayTracer::trace(CanvasPoint& point) {
 	RayTriangleIntersection rayData;
 	glm::vec3 cameraRay = getRayDirection(point);
-	getClosestIntersection(cameraRay, rayData, camera->position, true);
+	glm::vec3 pointNormal = glm::vec3(0, 0, 0);
+	getClosestIntersection(cameraRay, rayData, pointNormal, camera->position, true);
 		if (rayData.distanceFromCamera == INFINITY) {
-		window->setPixelColour(point.x, point.y, black);
-	}
+			window->setPixelColour(point.x, point.y, black);
+		}
 	else {
 		glm::vec3 shadowRay = glm::normalize(rayData.intersectionPoint - lightPoint);
 		float dist = glm::distance(lightPoint, rayData.intersectionPoint);
 		RayTriangleIntersection shadowData;
-		getClosestIntersection(shadowRay, shadowData, lightPoint, false);
+		getClosestIntersection(shadowRay, shadowData, pointNormal, lightPoint, false);
 		float intensity;
-		if (shadowData.distanceFromCamera < dist && rayData.triangleIndex != shadowData.triangleIndex)
+		if (shadowData.distanceFromCamera != 0 && rayData.triangleIndex != shadowData.triangleIndex)
 			intensity = 0;
 		else {
 			glm::vec3 viewRay = glm::normalize(camera->position - rayData.intersectionPoint);
-			//intensity = 1;
-			//intensity = calculateIntensity(shadowRay, (cameraRay), (*triangles)[rayData.triangleIndex]);
-			intensity = calculateIntensity(dist, glm::normalize(cameraRay), shadowRay, viewRay, (*triangles)[rayData.triangleIndex]);
-			//intensity = calculateIntensity(dist, shadowRay, rayData.triangleIndex);
-			//intensity = calculateIntensity(rayData.distanceFromCamera, cameraRay, shadowRay, (*triangles)[rayData.triangleIndex]);
+			intensity = calculateIntensity(dist, glm::normalize(cameraRay), shadowRay, viewRay, (*triangles)[rayData.triangleIndex], pointNormal);
 		}
-		window->setPixelColour(point.x, point.y, rayData.intersectedTriangle.colour.getArbg(std::max(intensity, 0.2f)));
+		
+		if(rayData.intersectedTriangle.colour.textured){
+			std::vector<glm::vec2> texturePoints;
+			texturePoints.push_back(glm::vec2(rayData.intersectedTriangle.texturePoints[0].x, rayData.intersectedTriangle.texturePoints[0].y));
+			texturePoints.push_back(glm::vec2(rayData.intersectedTriangle.texturePoints[1].x, rayData.intersectedTriangle.texturePoints[1].y));
+			texturePoints.push_back(glm::vec2(rayData.intersectedTriangle.texturePoints[2].x, rayData.intersectedTriangle.texturePoints[2].y));
+			glm::vec2 coord = texturePoints[0];
+			coord += -(texturePoints[1] - texturePoints[0]) * rayData.u * (float) textureMap.width;
+			coord += -(texturePoints[2] - texturePoints[0]) * rayData.v * (float) textureMap.height;
+			int x = std::floorf(coord[0]);
+			int y = std::floorf(coord[1]);
+			long index = textureMap.width * y + x;
+			float brightness = std::max(intensity, 0.2f);
+			uint32_t argb = 0xFF000000;
+			uint32_t red = (textureMap.pixels[index] & 0x00FF0000) >> 16;
+			uint32_t green = (textureMap.pixels[index] & 0x0000FF00) >> 8;
+			uint32_t blue = (textureMap.pixels[index] & 0x000000FF);
+			red *= brightness; green *= brightness; blue *= brightness;
+			red = red << 16; green = green << 8;
+			argb += red + green + blue;
+			window->setPixelColour(point.x, point.y, argb);
+
+		}
+		else {
+			window->setPixelColour(point.x, point.y, rayData.intersectedTriangle.colour.getArbg(std::max(intensity, 0.2f)));
+		}
 	}
 }
 
@@ -127,7 +155,6 @@ void RayTracer::drawRayTracedImage(DrawingWindow* window, std::vector<ModelTrian
 	this->window = window;
 	this->triangles = triangles;
 	this->camera = camera;
-		
 	for (int i = 0; i < height; i++){
 		for (int j = 0; j < width; j++) {
 		    CanvasPoint point = CanvasPoint(j,i, camera->focalLength);

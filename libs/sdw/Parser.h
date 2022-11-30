@@ -15,6 +15,7 @@
 class Parser {
 	const float scale = 0.17;
 	const float maxColour = 255.0f;
+	std::vector<glm::vec3> vertexNormals;
 	
 public:
 	std::vector<glm::vec3> vertices;

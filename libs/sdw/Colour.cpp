@@ -1,8 +1,8 @@
 #include "Colour.h"
 #include <utility>
 
-Colour::Colour() { black = 0x00FFFFFF; };
-Colour::Colour(int r, int g, int b) : red(r), green(g), blue(b) { black = 0x00FFFFFF; }
+Colour::Colour() { black = 0x00FFFFFF; textured = false; };
+Colour::Colour(int r, int g, int b) : red(r), green(g), blue(b) { black = 0x00FFFFFF; textured = false; }
 Colour::Colour(std::string n, int r, int g, int b) :
 		name(std::move(n)),
 		red(r), green(g), blue(b) {

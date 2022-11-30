@@ -3,11 +3,13 @@
 #include <glm/glm.hpp>
 #include <string>
 #include <array>
+#include <vector>
 #include "Colour.h"
 #include "TexturePoint.h"
 
 struct ModelTriangle {
 	std::array<glm::vec3, 3> vertices{};
+	std::vector<glm::vec3> vertexNormals{};
 	std::array<TexturePoint, 3> texturePoints{};
 	Colour colour{};
 	glm::vec3 normal{};
