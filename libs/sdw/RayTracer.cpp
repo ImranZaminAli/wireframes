@@ -4,7 +4,7 @@ RayTracer::RayTracer(int windowWidth, int windowHeight) {
 	width = windowWidth;
 	height = windowHeight;
 	//lightPoint = glm::vec3(0, 0.1, 0.0);
-	lightPoint = glm::vec3(0.35f, 0.3f, 0.0f);
+	lightPoint = glm::vec3(0.0f, 0.4f, 0.0f);
 	//lightPoint = glm::vec3(0, 0.4, 0);
 	black = 0xFF000000;
 	sourceStrength = 2.0f;
@@ -100,21 +100,23 @@ float RayTracer::calculateIntensity(float distance, glm::vec3 cameraRay, glm::ve
 	float specularStrength = 10.0f;
 	float diffuseIntensity = fmaxf(proximityIntensity * proximityStrength, incidentStrength * inidenceAngle);
 	return glm::clamp(specularIntensity * specularStrength + incidentStrength * inidenceAngle + proximityIntensity * proximityStrength, 0.0f, 1.0f);
+	//return glm::clamp(specularIntensity * specularStrength, 0.0f, 1.0f);
 }
 
-void RayTracer::trace(CanvasPoint& point) {
+std::pair<Colour, float> RayTracer::trace(CanvasPoint& point, glm::vec3 lightPos) {
 	RayTriangleIntersection rayData;
 	glm::vec3 cameraRay = getRayDirection(point);
 	glm::vec3 pointNormal = glm::vec3(0, 0, 0);
 	getClosestIntersection(cameraRay, rayData, pointNormal, camera->position, true);
 		if (rayData.distanceFromCamera == INFINITY) {
-			window->setPixelColour(point.x, point.y, black);
+			//window->setPixelColour(point.x, point.y, black);
+			return std::make_pair(Colour(0,0,0), 0.0f);
 		}
 	else {
-		glm::vec3 shadowRay = glm::normalize(rayData.intersectionPoint - lightPoint);
-		float dist = glm::distance(lightPoint, rayData.intersectionPoint);
+		glm::vec3 shadowRay = glm::normalize(rayData.intersectionPoint - lightPos);
+		float dist = glm::distance(lightPos, rayData.intersectionPoint);
 		RayTriangleIntersection shadowData;
-		getClosestIntersection(shadowRay, shadowData, pointNormal, lightPoint, false);
+		getClosestIntersection(shadowRay, shadowData, pointNormal, lightPos, false);
 		float intensity;
 		if (shadowData.distanceFromCamera != 0 && rayData.triangleIndex != shadowData.triangleIndex)
 			intensity = 0;
@@ -134,19 +136,25 @@ void RayTracer::trace(CanvasPoint& point) {
 			int x = std::floorf(coord[0]);
 			int y = std::floorf(coord[1]);
 			long index = textureMap.width * y + x;
-			float brightness = std::max(intensity, 0.2f);
+			//float brightness = std::max(intensity, 0.2f);
 			uint32_t argb = 0xFF000000;
 			uint32_t red = (textureMap.pixels[index] & 0x00FF0000) >> 16;
 			uint32_t green = (textureMap.pixels[index] & 0x0000FF00) >> 8;
 			uint32_t blue = (textureMap.pixels[index] & 0x000000FF);
-			red *= brightness; green *= brightness; blue *= brightness;
-			red = red << 16; green = green << 8;
-			argb += red + green + blue;
-			window->setPixelColour(point.x, point.y, argb);
+			//red *= brightness; green *= brightness; blue *= brightness;
+			//red = red << 16; green = green << 8;
+			//argb += red + green + blue;
+			//window->setPixelColour(point.x, point.y, argb);
+			return std::make_pair(Colour(red, green, blue), intensity);
 
 		}
 		else {
-			window->setPixelColour(point.x, point.y, rayData.intersectedTriangle.colour.getArbg(std::max(intensity, 0.2f)));
+			//window->setPixelColour(point.x, point.y, rayData.intersectedTriangle.colour.getArbg(std::max(intensity, 0.2f)));
+			/*float brightness = std::fmaxf(0.2f, intensity);
+			rayData.intersectedTriangle.colour.red *= brightness;
+			rayData.intersectedTriangle.colour.green *= brightness;
+			rayData.intersectedTriangle.colour.blue *= brightness;*/
+			return std::make_pair(rayData.intersectedTriangle.colour, intensity);
 		}
 	}
 }
@@ -155,10 +163,22 @@ void RayTracer::drawRayTracedImage(DrawingWindow* window, std::vector<ModelTrian
 	this->window = window;
 	this->triangles = triangles;
 	this->camera = camera;
+	std::vector<glm::vec3> lights;
+	lights.push_back(lightPoint);
+	//lights.push_back(lights[0] + glm::vec3(0.15, 0.0, 0.0));
+	//lights.push_back(lights[1] + glm::vec3(0.15, 0.0, 0.0));
+	
 	for (int i = 0; i < height; i++){
 		for (int j = 0; j < width; j++) {
+			Colour colour = Colour(0, 0, 0);
+			float intensity = 0;
 		    CanvasPoint point = CanvasPoint(j,i, camera->focalLength);
-			trace(point);
+			for (int i = 0; i < lights.size(); i++) {
+				std::pair<Colour, float> colourVal = trace(point, lights[i]);
+				colour = colourVal.first;
+				intensity += colourVal.second;
+			}
+			window->setPixelColour(j,i,colour.getArbg(std::fmaxf(intensity/lights.size(), 0.2f)));
 		}
 	}
 
