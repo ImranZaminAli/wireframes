@@ -27,8 +27,6 @@ class RayTracer {
 	bool checkValid(float u, float v, float t);
 	glm::vec3 calculateIntersection(ModelTriangle triangle, glm::vec3& pointNormal, float u, float v);
 	std::pair<Colour, float> trace(CanvasPoint& point, glm::vec3 lightPos);
-	float calculateIntensity(float distance, glm::vec3 rayDir, ModelTriangle& tri);
-	float calculateIntensity(glm::vec3 cameraRay, glm::vec3 shadowRay, ModelTriangle& tri);
 	float calculateIntensity(float distance, glm::vec3 cameraRay, glm::vec3 shadowRay, glm::vec3 viewRay, ModelTriangle& tri, glm::vec3 pointNormal);
 	TextureMap textureMap;
 	glm::vec3 getRayDirection(CanvasPoint& point);

@@ -76,19 +76,6 @@ void RayTracer::getClosestIntersection(glm::vec3 rayDir, RayTriangleIntersection
 	}
 }
 
-float RayTracer::calculateIntensity(float distance, glm::vec3 rayDir, ModelTriangle& tri){
-	float dotProduct = glm::dot(rayDir, tri.normal);
-    float intensity = (sourceStrength * dotProduct) / (4 * M_PI * distance * distance);
-	
-	return glm::clamp(intensity, 0.07f,1.0f);
-}
-
-float RayTracer::calculateIntensity(glm::vec3 shadowRay, glm::vec3 cameraRay, ModelTriangle& tri) {
-	glm::vec3 reflectedRay = glm::normalize(shadowRay - 2.0f * tri.normal * glm::dot(shadowRay, tri.normal));
-	float intensity = glm::dot(reflectedRay, cameraRay);
-	return glm::clamp(std::powf(intensity, 256.0f), 0.0f, 1.0f);
-}
-
 float RayTracer::calculateIntensity(float distance, glm::vec3 cameraRay, glm::vec3 shadowRay, glm::vec3 viewRay, ModelTriangle& tri, glm::vec3 pointNormal) {
 	glm::vec3 reflectedRay = glm::normalize(shadowRay - 2.0f * pointNormal * glm::dot(shadowRay, -pointNormal));
 	float specularIntensity = std::powf(glm::dot(reflectedRay, viewRay), 256);
@@ -100,7 +87,6 @@ float RayTracer::calculateIntensity(float distance, glm::vec3 cameraRay, glm::ve
 	float specularStrength = 10.0f;
 	float diffuseIntensity = fmaxf(proximityIntensity * proximityStrength, incidentStrength * inidenceAngle);
 	return glm::clamp(specularIntensity * specularStrength + incidentStrength * inidenceAngle + proximityIntensity * proximityStrength, 0.0f, 1.0f);
-	//return glm::clamp(specularIntensity * specularStrength, 0.0f, 1.0f);
 }
 
 std::pair<Colour, float> RayTracer::trace(CanvasPoint& point, glm::vec3 lightPos) {
@@ -109,7 +95,6 @@ std::pair<Colour, float> RayTracer::trace(CanvasPoint& point, glm::vec3 lightPos
 	glm::vec3 pointNormal = glm::vec3(0, 0, 0);
 	getClosestIntersection(cameraRay, rayData, pointNormal, camera->position, true);
 		if (rayData.distanceFromCamera == INFINITY) {
-			//window->setPixelColour(point.x, point.y, black);
 			return std::make_pair(Colour(0,0,0), 0.0f);
 		}
 	else {
@@ -136,24 +121,15 @@ std::pair<Colour, float> RayTracer::trace(CanvasPoint& point, glm::vec3 lightPos
 			int x = std::floorf(coord[0]);
 			int y = std::floorf(coord[1]);
 			long index = textureMap.width * y + x;
-			//float brightness = std::max(intensity, 0.2f);
 			uint32_t argb = 0xFF000000;
 			uint32_t red = (textureMap.pixels[index] & 0x00FF0000) >> 16;
 			uint32_t green = (textureMap.pixels[index] & 0x0000FF00) >> 8;
 			uint32_t blue = (textureMap.pixels[index] & 0x000000FF);
-			//red *= brightness; green *= brightness; blue *= brightness;
-			//red = red << 16; green = green << 8;
-			//argb += red + green + blue;
-			//window->setPixelColour(point.x, point.y, argb);
+			
 			return std::make_pair(Colour(red, green, blue), intensity);
 
 		}
 		else {
-			//window->setPixelColour(point.x, point.y, rayData.intersectedTriangle.colour.getArbg(std::max(intensity, 0.2f)));
-			/*float brightness = std::fmaxf(0.2f, intensity);
-			rayData.intersectedTriangle.colour.red *= brightness;
-			rayData.intersectedTriangle.colour.green *= brightness;
-			rayData.intersectedTriangle.colour.blue *= brightness;*/
 			return std::make_pair(rayData.intersectedTriangle.colour, intensity);
 		}
 	}
