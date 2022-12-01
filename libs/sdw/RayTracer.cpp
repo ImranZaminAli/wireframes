@@ -4,10 +4,11 @@ RayTracer::RayTracer(int windowWidth, int windowHeight) {
 	width = windowWidth;
 	height = windowHeight;
 	//lightPoint = glm::vec3(0, 0.1, 0.0);
-	lightPoint = glm::vec3(0.0f, 0.4f, 0.0f);
+	lightPoint = glm::vec3(0.0f, 0.3f, 0.0f);
 	//lightPoint = glm::vec3(0, 0.4, 0);
 	black = 0xFF000000;
 	sourceStrength = 2.0f;
+	maxBounces = 5;
 	textureMap = TextureMap("C:\\Users\\izami\\Documents\\UoBYr3\\Graphics\\wireframes\\texture.ppm");
 }
 
@@ -76,8 +77,14 @@ void RayTracer::getClosestIntersection(glm::vec3 rayDir, RayTriangleIntersection
 	}
 }
 
+glm::vec3 RayTracer::getReflectedRay(glm::vec3& incidentRay, glm::vec3& normal) {
+	//return glm::normalize(incidentRay - 2.0f * normal * glm::dot(incidentRay, -normal));
+	return 2.0f * glm::dot(normal, incidentRay) * normal - incidentRay;
+}
+
 float RayTracer::calculateIntensity(float distance, glm::vec3 cameraRay, glm::vec3 shadowRay, glm::vec3 viewRay, ModelTriangle& tri, glm::vec3 pointNormal) {
-	glm::vec3 reflectedRay = glm::normalize(shadowRay - 2.0f * pointNormal * glm::dot(shadowRay, -pointNormal));
+	//glm::vec3 reflectedRay = glm::normalize(shadowRay - 2.0f * pointNormal * glm::dot(shadowRay, -pointNormal));
+	glm::vec3 reflectedRay = getReflectedRay(shadowRay, pointNormal);
 	float specularIntensity = std::powf(glm::dot(reflectedRay, viewRay), 256);
 	
 	float inidenceAngle = glm::dot(shadowRay, pointNormal);
@@ -89,14 +96,20 @@ float RayTracer::calculateIntensity(float distance, glm::vec3 cameraRay, glm::ve
 	return glm::clamp(specularIntensity * specularStrength + incidentStrength * inidenceAngle + proximityIntensity * proximityStrength, 0.0f, 1.0f);
 }
 
-std::pair<Colour, float> RayTracer::trace(CanvasPoint& point, glm::vec3 lightPos) {
+std::pair<Colour, float> RayTracer::trace(glm::vec3& rayDir, glm::vec3 start, glm::vec3 lightPos, int bounce) {
+	if (bounce > maxBounces)
+		return std::make_pair(Colour(255, 255, 255), 1.0f);
 	RayTriangleIntersection rayData;
-	glm::vec3 cameraRay = getRayDirection(point);
 	glm::vec3 pointNormal = glm::vec3(0, 0, 0);
-	getClosestIntersection(cameraRay, rayData, pointNormal, camera->position, true);
-		if (rayData.distanceFromCamera == INFINITY) {
-			return std::make_pair(Colour(0,0,0), 0.0f);
-		}
+	getClosestIntersection(rayDir, rayData, pointNormal, start, true);
+	if (rayData.distanceFromCamera == INFINITY) {
+		return std::make_pair(Colour(0,0,0), 0.0f);
+	}
+	else if (rayData.intersectedTriangle.colour.mirror) {
+		glm::vec3 reflectRay = -getReflectedRay(glm::normalize(rayDir),pointNormal);
+		//std::cout << rayDir[0] << " " << rayDir[1] << " " << rayDir[2] << " " << reflectRay[0] << " " << reflectRay[1] << " " << reflectRay[2] << std::endl;
+		return trace(glm::normalize(reflectRay), rayData.intersectionPoint, lightPos, bounce + 1);
+	}
 	else {
 		glm::vec3 shadowRay = glm::normalize(rayData.intersectionPoint - lightPos);
 		float dist = glm::distance(lightPos, rayData.intersectionPoint);
@@ -107,7 +120,7 @@ std::pair<Colour, float> RayTracer::trace(CanvasPoint& point, glm::vec3 lightPos
 			intensity = 0;
 		else {
 			glm::vec3 viewRay = glm::normalize(camera->position - rayData.intersectionPoint);
-			intensity = calculateIntensity(dist, glm::normalize(cameraRay), shadowRay, viewRay, (*triangles)[rayData.triangleIndex], pointNormal);
+			intensity = calculateIntensity(dist, glm::normalize(rayDir), shadowRay, viewRay, (*triangles)[rayData.triangleIndex], pointNormal);
 		}
 		
 		if(rayData.intersectedTriangle.colour.textured){
@@ -150,7 +163,8 @@ void RayTracer::drawRayTracedImage(DrawingWindow* window, std::vector<ModelTrian
 			float intensity = 0;
 		    CanvasPoint point = CanvasPoint(j,i, camera->focalLength);
 			for (int i = 0; i < lights.size(); i++) {
-				std::pair<Colour, float> colourVal = trace(point, lights[i]);
+				glm::vec3 rayDir = getRayDirection(point);
+				std::pair<Colour, float> colourVal = trace(glm::normalize(rayDir), camera->position, lights[i], 0);
 				colour = colourVal.first;
 				intensity += colourVal.second;
 			}

@@ -1,5 +1,4 @@
 #include "Parser.h"
-
 using namespace std;
 
 Parser::Parser() {
@@ -8,10 +7,11 @@ Parser::Parser() {
 	//ifstream mtlStream("cornell-box.mtl", ifstream::binary);
 	ifstream mtlStream("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\textured-cornell-box.mtl", ifstream::binary);
 	string currentColour;
-	
 	while (getline(mtlStream, nextLine)) {
 		auto tokens = split(nextLine, ' ');
+		
 		if (tokens[0] == "newmtl") {
+			
 			currentColour = tokens[1];
 		}
 		else if (tokens[0] == "Kd") {
@@ -21,7 +21,13 @@ Parser::Parser() {
 		else if (tokens[0] == "map_Kd") {
 			colours[currentColour].textured = true;
 		}
+		else if (tokens[0] == "refl") {
+			
+			colours[currentColour].mirror = true;
+		}
+		
 	}
+	
 	ifstream objStream("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\textured-cornell-box.obj", ifstream::binary);
 	//ifstream objStream("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\sphere.obj", ifstream::binary);
 	//ifstream objStream("cornell-box.obj", ifstream::binary);
@@ -31,28 +37,6 @@ Parser::Parser() {
 	while (getline(objStream, nextLine)) {
 
 		auto tokens = split(nextLine, ' ');
-
-		/*if (tokens[0] == "v") {
-			glm::vec3 vertex;
-			vertex[0] = stof(tokens[1]); vertex[1] = stof(tokens[2]); vertex[2] = stof(tokens[3]);
-			vertices.push_back(vertex * scale);
-		}
-		else if (tokens[0] == "f") {
-			vector<glm::vec3> corners;
-			for (int i = 1; i < 4; i++) {
-
-				string position = split(tokens[i], '/')[0];
-				int index = stoi(position) - 1;
-				corners.push_back(vertices[index]);
-			}
-			
-			ModelTriangle tri = ModelTriangle(corners[0], corners[1], corners[2], colour);
-			tri.normal = glm::normalize(glm::cross(corners[2] - corners[0], corners[1] - corners[0] ));
-			triangles.push_back(tri);
-		}
-		else if (tokens[0] == "usemtl") {
-			colour = colours[tokens[1]];
-		}*/
 
 		if (tokens[0] == "v") {
 			glm::vec3 vertex;

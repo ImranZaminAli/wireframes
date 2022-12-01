@@ -8,6 +8,7 @@ struct Colour {
 	int green{};
 	int blue{};
 	bool textured;
+	bool mirror;
 	uint32_t black;
 	Colour();
 	Colour(int r, int g, int b);
