@@ -4,11 +4,12 @@ RayTracer::RayTracer(int windowWidth, int windowHeight) {
 	width = windowWidth;
 	height = windowHeight;
 	//lightPoint = glm::vec3(0, 0.1, 0.0);
-	lightPoint = glm::vec3(0.0f, 0.3f, 0.0f);
-	//lightPoint = glm::vec3(0, 0.4, 0);
+	//lightPoint = glm::vec3(0.2f, 0.7f, 0.3f);
+	//lightPoint = glm::vec3(0,0.4,2);
+	lightPoint = glm::vec3(0, 0.4, 0);
 	black = 0xFF000000;
 	sourceStrength = 2.0f;
-	maxBounces = 5;
+	maxBounces = 10;
 	textureMap = TextureMap("C:\\Users\\izami\\Documents\\UoBYr3\\Graphics\\wireframes\\texture.ppm");
 }
 
@@ -77,46 +78,109 @@ void RayTracer::getClosestIntersection(glm::vec3 rayDir, RayTriangleIntersection
 	}
 }
 
+void RayTracer::checkForBlockedLight(glm::vec3 rayDir, RayTriangleIntersection& rayData, glm::vec3& pointNormal, glm::vec3 startPosition) {
+	rayData.distanceFromCamera = INFINITY;
+	for (int i = 0; i < triangles->size(); i++) {
+		glm::vec3 possibleSolution = getPossibleSolution(i, rayDir, startPosition);
+		bool valid = checkValid(possibleSolution[1], possibleSolution[2], possibleSolution[0]);
+
+		if (valid && !(*triangles)[i].colour.glass && possibleSolution[0] < rayData.distanceFromCamera) {
+
+			rayData.distanceFromCamera = possibleSolution[0];
+			rayData.intersectedTriangle = (*triangles)[i];
+			rayData.triangleIndex = i;
+
+
+			rayData.intersectionPoint = calculateIntersection((*triangles)[i], pointNormal, possibleSolution[1], possibleSolution[2]);
+			rayData.u = possibleSolution[1];
+			rayData.v = possibleSolution[2];
+		}
+	}
+}
+
 glm::vec3 RayTracer::getReflectedRay(glm::vec3& incidentRay, glm::vec3& normal) {
 	//return glm::normalize(incidentRay - 2.0f * normal * glm::dot(incidentRay, -normal));
 	return 2.0f * glm::dot(normal, incidentRay) * normal - incidentRay;
 }
 
 float RayTracer::calculateIntensity(float distance, glm::vec3 cameraRay, glm::vec3 shadowRay, glm::vec3 viewRay, ModelTriangle& tri, glm::vec3 pointNormal) {
-	//glm::vec3 reflectedRay = glm::normalize(shadowRay - 2.0f * pointNormal * glm::dot(shadowRay, -pointNormal));
-	glm::vec3 reflectedRay = getReflectedRay(shadowRay, pointNormal);
+	glm::vec3 reflectedRay = glm::normalize(shadowRay - 2.0f * pointNormal * glm::dot(shadowRay,pointNormal));
+	//glm::vec3 reflectedRay = getReflectedRay(shadowRay, pointNormal);
 	float specularIntensity = std::powf(glm::dot(reflectedRay, viewRay), 256);
 	
 	float inidenceAngle = glm::dot(shadowRay, pointNormal);
-	float proximityStrength = 1.5f;
+	float proximityStrength = 1.5f; //1.5
 	float proximityIntensity = 1/ (4 * M_PI * distance * distance);
-	float incidentStrength = 1.6f;
-	float specularStrength = 10.0f;
-	float diffuseIntensity = fmaxf(proximityIntensity * proximityStrength, incidentStrength * inidenceAngle);
-	return glm::clamp(specularIntensity * specularStrength + incidentStrength * inidenceAngle + proximityIntensity * proximityStrength, 0.0f, 1.0f);
+	//float proximityIntensity = 1.0f;
+	float incidentStrength = 3.0f; // 1.6
+	float specularStrength = 5.0f;
+	//float diffuseIntensity = fmaxf(proximityIntensity * proximityStrength, incidentStrength * inidenceAngle);
+	return glm::clamp(specularIntensity * specularStrength + 1.8f * incidentStrength * inidenceAngle * proximityIntensity * proximityStrength, 0.0f, 1.0f);
 }
 
-std::pair<Colour, float> RayTracer::trace(glm::vec3& rayDir, glm::vec3 start, glm::vec3 lightPos, int bounce) {
-	if (bounce > maxBounces)
-		return std::make_pair(Colour(255, 255, 255), 1.0f);
+std::pair<Colour, float> RayTracer::trace(glm::vec3& rayDir, glm::vec3 start, glm::vec3 lightPos, int bounce, float refractiveIndex) {
+	if (bounce > maxBounces) {
+		//std::cout << "acheived\n";
+		return std::make_pair(Colour(0, 0, 0), 1.0f);
+	}
 	RayTriangleIntersection rayData;
 	glm::vec3 pointNormal = glm::vec3(0, 0, 0);
 	getClosestIntersection(rayDir, rayData, pointNormal, start, true);
 	if (rayData.distanceFromCamera == INFINITY) {
+		//if (bounce > 0) std::cout << "wall";
 		return std::make_pair(Colour(0,0,0), 0.0f);
 	}
 	else if (rayData.intersectedTriangle.colour.mirror) {
-		glm::vec3 reflectRay = -getReflectedRay(glm::normalize(rayDir),pointNormal);
+		//glm::vec3 reflectRay = -getReflectedRay(glm::normalize(rayDir),pointNormal);
+		glm::vec3 reflectRay = glm::reflect(glm::normalize(rayDir), pointNormal);
 		//std::cout << rayDir[0] << " " << rayDir[1] << " " << rayDir[2] << " " << reflectRay[0] << " " << reflectRay[1] << " " << reflectRay[2] << std::endl;
-		return trace(glm::normalize(reflectRay), rayData.intersectionPoint, lightPos, bounce + 1);
+		return trace(glm::normalize(reflectRay), rayData.intersectionPoint, lightPos, bounce + 1, refractiveIndex);
+	}
+	else if (rayData.intersectedTriangle.colour.glass) {
+		//std::cout << rayData.intersectedTriangle.colour.rf << std::endl;
+		float nDotI = glm::dot(pointNormal, rayDir);
+		/*float ratio;
+		if (nDotI < 0) {
+			nDotI *= -1;
+			ratio = refractiveIndex / rayData.intersectedTriangle.colour.rf;
+		}
+		else {
+			pointNormal *= -1;
+			ratio = rayData.intersectedTriangle.colour.rf / refractiveIndex;
+		}*/
+		if (nDotI > 1.0f) nDotI = 1.0f;
+		if (nDotI < 1.0f) nDotI = -1.0f;
+		glm::vec3 normal = pointNormal;
+		float ratio;
+		if (nDotI < 0) {
+			nDotI *= -1;
+			ratio = refractiveIndex / rayData.intersectedTriangle.colour.rf;
+		}
+		else {
+			normal *= -1;
+			ratio = rayData.intersectedTriangle.colour.rf / refractiveIndex;
+		}
+		float k = 1 - ratio * ratio * (1 - nDotI * nDotI);
+		if (k < 0) {
+			std::cout << "tir\n";
+			return trace(glm::reflect(rayDir, pointNormal), rayData.intersectionPoint, lightPos, bounce + 1, refractiveIndex);
+		}
+		else{
+			//std::cout << "refract\n";
+			glm::vec3 refractRay = ratio * rayDir + (ratio * nDotI - std::sqrtf(k)) * normal;
+			return trace(refractRay, rayData.intersectionPoint, lightPos, bounce + 1, rayData.intersectedTriangle.colour.rf);
+		}
+
 	}
 	else {
+		
 		glm::vec3 shadowRay = glm::normalize(rayData.intersectionPoint - lightPos);
 		float dist = glm::distance(lightPos, rayData.intersectionPoint);
 		RayTriangleIntersection shadowData;
-		getClosestIntersection(shadowRay, shadowData, pointNormal, lightPos, false);
+		//getClosestIntersection(shadowRay, shadowData, pointNormal, lightPos, false);
+		checkForBlockedLight(shadowRay, shadowData, pointNormal, lightPos);
 		float intensity;
-		if (shadowData.distanceFromCamera != 0 && rayData.triangleIndex != shadowData.triangleIndex)
+		if (shadowData.distanceFromCamera > 0.0001 && rayData.triangleIndex != shadowData.triangleIndex)
 			intensity = 0;
 		else {
 			glm::vec3 viewRay = glm::normalize(camera->position - rayData.intersectionPoint);
@@ -164,7 +228,7 @@ void RayTracer::drawRayTracedImage(DrawingWindow* window, std::vector<ModelTrian
 		    CanvasPoint point = CanvasPoint(j,i, camera->focalLength);
 			for (int i = 0; i < lights.size(); i++) {
 				glm::vec3 rayDir = getRayDirection(point);
-				std::pair<Colour, float> colourVal = trace(glm::normalize(rayDir), camera->position, lights[i], 0);
+				std::pair<Colour, float> colourVal = trace(glm::normalize(rayDir), camera->position, lights[i], 0, 1.0f);
 				colour = colourVal.first;
 				intensity += colourVal.second;
 			}

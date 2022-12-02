@@ -25,10 +25,15 @@ Parser::Parser() {
 			
 			colours[currentColour].mirror = true;
 		}
+		else if (tokens[0] == "refr") {
+			colours[currentColour].glass = true;
+			colours[currentColour].rf = stof(tokens[1]);
+		}
 		
 	}
 	
 	ifstream objStream("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\textured-cornell-box.obj", ifstream::binary);
+	//ifstream objStream("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\textured-cornell-box-sphere.obj", ifstream::binary);
 	//ifstream objStream("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\sphere.obj", ifstream::binary);
 	//ifstream objStream("cornell-box.obj", ifstream::binary);
 	
