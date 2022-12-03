@@ -28,7 +28,7 @@ refl 1
 
 newmtl Glass
 Kd 1.000000 1.000000 1.000000
-refr 1.52
+refr 1.5
 
 newmtl Cobbles
 Kd 1.000000 1.000000 1.000000

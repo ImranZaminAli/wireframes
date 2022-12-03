@@ -13,7 +13,7 @@ void Rasteriser::getLineVariables(float &numberOfSteps, float &xStep, float &ySt
     float yDiff = finish.y - start.y;
     float depthDiff = finish.depth - start.depth;
     
-    numberOfSteps = std::max(std::abs(xDiff), std::abs(yDiff));
+    numberOfSteps = std::max(std::fabs(xDiff), std::fabs(yDiff));
     
     xStep = xDiff / numberOfSteps;
     yStep = yDiff / numberOfSteps;
@@ -31,7 +31,7 @@ CanvasPoint Rasteriser::getScaledPoint(CanvasPoint a, CanvasPoint b, CanvasPoint
 
 bool Rasteriser::checkAndUpdateBuffer(float x, float y, float depth, std::array<std::array<float, WIDTH>, HEIGHT> &buffer) {
     float reciprocal = 1/depth;
-    if((y < HEIGHT && y >= 0 && x < WIDTH && x >= 0) && (buffer[y][x] == 0 || reciprocal > buffer[y][x])){
+    if((y < HEIGHT && y >= 0 && x < WIDTH && x >= 0) && (reciprocal > buffer[y][x])){
         buffer[y][x] = reciprocal;
         return true;
     }
@@ -78,9 +78,10 @@ void Rasteriser::drawLine(DrawingWindow &window, CanvasPoint &start, CanvasPoint
     for(float i = 0.0f; i <= numberOfSteps; i++){
         float x = start.x + xStep * i;
         float y = start.y + yStep * i;
-        float depth = 1 + std::exp(-(start.depth + depthStep * i));
+        float depth = start.depth + depthStep * i;
+        float newDepth = 1 + std::exp(-(start.depth + depthStep * i));
         //float depth = start.depth + depthStep * i;
-        if(checkAndUpdateBuffer(floor(x), ceil(y), depth, buffer))
+        if(depth < 0 && checkAndUpdateBuffer(floor(x), ceil(y), newDepth, buffer))
             window.setPixelColour(floor(x), ceil(y), colour.getArbg());
     }
 }
