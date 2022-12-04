@@ -1,7 +1,7 @@
 #include "Rasteriser.h"
 
 Rasteriser::Rasteriser() {
-    TextureMap map = TextureMap("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\texture.ppm");
+    TextureMap map = TextureMap("texture.ppm");
     pixels = map.pixels;
     textureHeight = map.height;
     textureWidth = map.width;

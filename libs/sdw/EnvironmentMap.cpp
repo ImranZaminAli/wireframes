@@ -1,13 +1,14 @@
 #include "EnvironmentMap.h"
 
 EnvironmentMap::EnvironmentMap() {
-	std::string root = "C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\";
+	//std::string root = "C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\";
 	/*posX = TextureMap("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\textured-cornell-box.mtl\\posx");
 	posX = TextureMap("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\textured-cornell-box.mtl\\posy");
 	posX = TextureMap("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\textured-cornell-box.mtl\\posz");
 	posX = TextureMap("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\textured-cornell-box.mtl\\negx");
 	posX = TextureMap("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\textured-cornell-box.mtl\\po");
 	posX = TextureMap("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\textured-cornell-box.mtl\\posx");*/
+    std::string root = "";
 	posX = TextureMap(root + "posy.ppm");
 	posY = TextureMap(root + "posy.ppm");
 	posZ = TextureMap(root + "posz.ppm");

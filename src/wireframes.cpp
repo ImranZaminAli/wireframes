@@ -201,8 +201,8 @@ void handleEvent(SDL_Event event, DrawingWindow &window) {
 		draw(window);
 		window.renderFrame();
 	} else if (event.type == SDL_MOUSEBUTTONDOWN) {
-		CanvasPoint point = CanvasPoint(event.button.x, event.button.y, camera.focalLength);
-		rayTracer.trace(rayTracer.getRayDirection(point), camera.position, rayTracer.lightPoint, 0, true);
+		//CanvasPoint point = CanvasPoint(event.button.x, event.button.y, camera.focalLength);
+		//rayTracer.trace(rayTracer.getRayDirection(point), camera.position, rayTracer.lightPoint, 0, true);
 		
 		window.savePPM("output.ppm");
 		window.saveBMP("output.bmp");
@@ -215,34 +215,9 @@ int main(int argc, char *argv[]) {
 	//srand((unsigned int) time(NULL));
 	DrawingWindow window = DrawingWindow(WIDTH, HEIGHT, false);
 	SDL_Event event;
-	cout << "hello\n";
-	//draw(window);
-	//array<array<float, WIDTH>, HEIGHT> buffer{};
-	//for (int i = 0; i < parser.triangles.size(); i++) {
-	//	cout << i << endl;
-	//	drawTriangle(window, parser.triangles[i], buffer);
-	//}
-	//bool method = false;
-	//draw(window);
-	//rayTracer.drawRayTracedImage(&window, &parser.triangles, &camera);
 
-	
 
 	draw(window);
-	
-	/*CanvasPoint a = CanvasPoint(170, 10);
-	a.texturePoint = TexturePoint(195, 5);
-	
-	CanvasPoint b = CanvasPoint(250, 250);
-	b.texturePoint = TexturePoint(395, 380);
-
-	CanvasPoint c = CanvasPoint(10, 190);
-	c.texturePoint = TexturePoint(65, 330);
-
-	CanvasTriangle tri = CanvasTriangle(a, b, c);
-	orderTriPoints(tri);*/
-	//rasteriser.drawStrokedTriangle(window, tri, Colour(255,255,255), buffer);
-	//rasteriser.drawTexturedTriangle(window, tri, buffer);
 
 	window.renderFrame();
 	while (true) {

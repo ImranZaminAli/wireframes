@@ -3,8 +3,8 @@
 Parser::Parser() {
 	
 	
-	//ifstream mtlStream("cornell-box.mtl", ifstream::binary);
-	ifstream mtlStream("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\textured-cornell-box.mtl", ifstream::binary);
+	ifstream mtlStream("textured-cornell-box.mtl", ifstream::binary);
+	//ifstream mtlStream("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\textured-cornell-box.mtl", ifstream::binary);
 	string currentColour;
 	while (getline(mtlStream, nextLine)) {
 		auto tokens = split(nextLine, ' ');
@@ -43,9 +43,9 @@ Parser::Parser() {
 	}*/
 	//std::cout << colours[" "] << std::endl;
 	//ifstream objStream("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\textured-cornell-box.obj");
-	ifstream objStream("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\textured-cornell-box.obj", ifstream::binary);
+	//ifstream objStream("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\textured-cornell-box.obj", ifstream::binary);
 	//ifstream objStream("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\sphere.obj", ifstream::binary);
-	//ifstream objStream("cornell-box.obj", ifstream::binary);
+	ifstream objStream("textured-cornell-box.obj", ifstream::binary);
 	
 	//readObj("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\textured-cornell-box.obj", 1.0f);
 	//readObj("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\untitled.obj", 1.0f);
