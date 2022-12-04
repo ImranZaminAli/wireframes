@@ -11,6 +11,7 @@ struct Colour {
 	bool mirror;
 	bool glass;
 	bool environment;
+	bool bumped;
 	float rf;
 	uint32_t black;
 	Colour();

@@ -35,7 +35,6 @@ Colour TextureMap::getPixelColour(float x, float y) {
 	uint32_t red = (pixels[index] & 0x00FF0000) >> 16;
 	uint32_t green = (pixels[index] & 0x0000FF00) >> 8;
 	uint32_t blue = (pixels[index] & 0x000000FF);
-
 	return Colour(red, green, blue);
 }
 

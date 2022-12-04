@@ -32,7 +32,7 @@ Rasteriser rasteriser = Rasteriser();
 Parser parser = Parser();
 RayTracer rayTracer = RayTracer(WIDTH, HEIGHT);
 array<array<float, WIDTH>, HEIGHT> buffer{};
-DrawMode mode = DrawMode::wireframe;
+DrawMode mode = DrawMode::rayTrace;
 
 
 vector<float> interpolateSingleFloats(float from, float to, size_t numberOfValues){

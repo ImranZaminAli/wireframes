@@ -38,3 +38,7 @@ newmtl Environment
 Kd 1.000000 1.000000 1.000000
 env 1
 
+newmtl Bumped
+Kd 1.000000 1.000000 1.000000
+map_Kd floorTexture.ppm
+norms floorNormal.ppm

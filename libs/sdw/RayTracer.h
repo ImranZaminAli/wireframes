@@ -17,6 +17,7 @@ class RayTracer {
 	uint32_t black;
 	//EnvironmentMap envMap;
 	TextureMap envMap;
+	TextureMap normalMap;
 	std::vector<std::vector<uint32_t>> map;
 	//int lights;
 	std::vector<ModelTriangle>* triangles;

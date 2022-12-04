@@ -31,6 +31,9 @@ Parser::Parser() {
 		else if (tokens[0] == "env") {
 			colours[currentColour].environment = true;
 		}
+		else if (tokens[0] == "norms") {
+			colours[currentColour].bumped = true;
+		}
 		
 	}
 

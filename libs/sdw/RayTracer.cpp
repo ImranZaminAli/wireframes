@@ -12,9 +12,9 @@ RayTracer::RayTracer(int windowWidth, int windowHeight) {
 	black = 0xFF000000;
 	sourceStrength = 2.0f;
 	maxBounces = 20;
-	textureMap = TextureMap("C:\\Users\\izami\\Documents\\UoBYr3\\Graphics\\wireframes\\texture.ppm");
-	std::cout << "djdj\n";
-	envMap = TextureMap("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\spacebox.ppm");
+	textureMap = TextureMap("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\metalTexture.ppm");
+	normalMap = TextureMap("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\metalNorm.ppm");
+	//envMap = TextureMap("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\spacebox.ppm");
 
 
 	for (int y = 0; y < envMap.height; y++) {
@@ -63,10 +63,32 @@ glm::vec3 RayTracer::calculateIntersection(ModelTriangle triangle, glm::vec3& po
 	
 	point += (triangle.vertices[1] - triangle.vertices[0]) * u;
 	point += (triangle.vertices[2] - triangle.vertices[0]) * v;
-	pointNormal = triangle.vertexNormals[0];
-	pointNormal += (triangle.vertexNormals[1] - triangle.vertexNormals[0]) * u;
-	pointNormal += (triangle.vertexNormals[2] - triangle.vertexNormals[0]) * v;
+
+	if (triangle.colour.bumped) {
+		std::cout << "bumping\n";
+		std::vector<glm::vec2> texturePoints;
+		//std::cout << triangle.texturePoints[1] << std::endl;
+		texturePoints.push_back(glm::vec2(triangle.texturePoints[0].x, triangle.texturePoints[0].y));
+		texturePoints.push_back(glm::vec2(triangle.texturePoints[1].x, triangle.texturePoints[1].y));
+		texturePoints.push_back(glm::vec2(triangle.texturePoints[2].x, triangle.texturePoints[2].y));
+		glm::vec2 coord = texturePoints[0];
+		coord += -(texturePoints[1] - texturePoints[0]) * u * (float)textureMap.width;
+		coord += -(texturePoints[2] - texturePoints[0]) * v * (float)textureMap.height;
+		int x = std::floorf(coord[0]);
+		int y = std::floorf(coord[1]);
+
+		Colour normal = normalMap.getPixelColour(x, y);
+
+		pointNormal = glm::vec3(normal.red, normal.green, normal.blue);
+		pointNormal *= -1;
+	}
+	else {
+		pointNormal = triangle.vertexNormals[0];
+		pointNormal += (triangle.vertexNormals[1] - triangle.vertexNormals[0]) * u;
+		pointNormal += (triangle.vertexNormals[2] - triangle.vertexNormals[0]) * v;
+	}
 	pointNormal = glm::normalize(pointNormal);
+	
 	//point[2] *= -1;
 	return point;
 }
@@ -177,26 +199,20 @@ std::pair<Colour, float> RayTracer::trace(glm::vec3& rayDir, glm::vec3 start, gl
 	glm::vec3 pointNormal = glm::vec3(0, 0, 0);
 	getClosestIntersection(rayDir, rayData, pointNormal, start, true);
 	if (rayData.distanceFromCamera == INFINITY) {
-		//if (bounce > 0) std::cout << "wall";
 		return std::make_pair(Colour(0,0,0), 0.0f);
 	}
 	else if (rayData.intersectedTriangle.colour.mirror) {
-		//glm::vec3 reflectRay = -getReflectedRay(glm::normalize(rayDir),pointNormal);
 		glm::vec3 reflectRay = glm::reflect(glm::normalize(rayDir), pointNormal);
-		//std::cout << rayDir[0] << " " << rayDir[1] << " " << rayDir[2] << " " << reflectRay[0] << " " << reflectRay[1] << " " << reflectRay[2] << std::endl;
 		return trace(glm::normalize(reflectRay), rayData.intersectionPoint, lightPos, bounce + 1, debug);
 	}
 	else if (rayData.intersectedTriangle.colour.glass) {
 		rayDir = glm::normalize(rayDir);
 		float kr = fresnel(rayDir, pointNormal, 1.5);
-		//bool outside = glm::dot(rayDir, pointNormal) < 0;
 		std::pair<Colour, float> refractValues;
-		//if (bounce == 0) std::cout << kr << std::endl;
 		if (kr < 1.0f) {
 			glm::vec3 refractRay = refract(rayDir, pointNormal, 1.5);
 			refractValues = trace(glm::normalize(refractRay), rayData.intersectionPoint, lightPos, bounce + 1, debug);
 		}
-		//std::cout << kr << std::endl;
 		glm::vec3 reflectRay = glm::reflect(rayDir, pointNormal);
 		std::pair<Colour, float> reflectValues = trace(glm::normalize(reflectRay), rayData.intersectionPoint, lightPos, bounce + 1, debug);
 		Colour finalColour = refractValues.first;
@@ -209,12 +225,9 @@ std::pair<Colour, float> RayTracer::trace(glm::vec3& rayDir, glm::vec3 start, gl
 		if (finalColour.blue > 255.0f) finalColour.blue = 255.0f;
 		if(debug) std::cout << std::hex << finalColour.getArbg() << std::endl;
 		return std::make_pair(finalColour, (refractValues.second * (1-kr)+ reflectValues.second * kr));
-		//glm::vec3 refractRay = refract(rayDir, pointNormal, rayData.intersectedTriangle.colour.rf);
-		//return trace(glm::normalize(refractRay), rayData.intersectionPoint, lightPos, bounce + 1);
 		
 	}
 	else if (rayData.intersectedTriangle.colour.environment) {
-		//std::cout << "here\n";
 		glm::vec3 reflectRay = glm::reflect(rayDir, pointNormal);
 
 		float m = 2.0f * sqrt( pow(reflectRay.x, 2) + pow(reflectRay.y , 2) + pow(reflectRay.z + 1, 2));
@@ -238,9 +251,6 @@ std::pair<Colour, float> RayTracer::trace(glm::vec3& rayDir, glm::vec3 start, gl
 		return std::make_pair(Colour(red,blue,green), 1.0f);
 		//return std::make_pair(envMap.getEnvironmentPixelColour(reflectray), 1.0f);
 	}
-	/*else if (rayData.intersectedTriangle.colour.environment) {
-
-	}*/
 	else {
 		
 		glm::vec3 shadowRay = glm::normalize(rayData.intersectionPoint - lightPos);
@@ -252,7 +262,10 @@ std::pair<Colour, float> RayTracer::trace(glm::vec3& rayDir, glm::vec3 start, gl
 			intensity = 0;
 		else {
 			glm::vec3 viewRay = glm::normalize(camera->position - rayData.intersectionPoint);
-			intensity = calculateIntensity(dist, glm::normalize(rayDir), shadowRay, viewRay, (*triangles)[rayData.triangleIndex], pointNormal);
+
+			glm::vec3 normal = pointNormal;
+			
+			intensity = calculateIntensity(dist, glm::normalize(rayDir), shadowRay, viewRay, rayData.intersectedTriangle, pointNormal);
 		}
 		
 		if(rayData.intersectedTriangle.colour.textured){

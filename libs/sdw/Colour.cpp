@@ -1,8 +1,8 @@
 #include "Colour.h"
 #include <utility>
 
-Colour::Colour() { black = 0x00FFFFFF; textured = false; mirror = false; glass = false; rf = 1.0f; environment = false; };
-Colour::Colour(int r, int g, int b) : red(r), green(g), blue(b) { black = 0x00FFFFFF; textured = false; mirror = false; glass = false; rf = 1.0f; environment = false; }
+Colour::Colour() { black = 0x00FFFFFF; textured = false; mirror = false; glass = false; rf = 1.0f; environment = false; bumped = false; };
+Colour::Colour(int r, int g, int b) : red(r), green(g), blue(b) { black = 0x00FFFFFF; textured = false; mirror = false; glass = false; rf = 1.0f; environment = false; bumped = false; }
 Colour::Colour(std::string n, int r, int g, int b) :
 		name(std::move(n)),
 		red(r), green(g), blue(b) {
@@ -12,6 +12,7 @@ Colour::Colour(std::string n, int r, int g, int b) :
 	glass = false;
 	rf = 1.0f;
 	environment = false;
+	bumped = false;
 }
 std::ostream &operator<<(std::ostream &os, const Colour &colour) {
 	os << colour.name << " ["
