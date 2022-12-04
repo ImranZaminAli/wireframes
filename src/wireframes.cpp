@@ -160,7 +160,6 @@ void draw(DrawingWindow &window){
 		rayTracer.drawRayTracedImage(&window, &parser.triangles, &camera);
 	}
 
-    
 }
 
 void emptyBuffer() {
@@ -216,8 +215,8 @@ int main(int argc, char *argv[]) {
 	//srand((unsigned int) time(NULL));
 	DrawingWindow window = DrawingWindow(WIDTH, HEIGHT, false);
 	SDL_Event event;
+	cout << "hello\n";
 	//draw(window);
-
 	//array<array<float, WIDTH>, HEIGHT> buffer{};
 	//for (int i = 0; i < parser.triangles.size(); i++) {
 	//	cout << i << endl;

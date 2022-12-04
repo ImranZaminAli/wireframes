@@ -3,6 +3,7 @@
 RayTracer::RayTracer(int windowWidth, int windowHeight) {
 	width = windowWidth;
 	height = windowHeight;
+	std::cout << "here\n";
 	//lightPoint = glm::vec3(0, 0.1, 0.0);
 	//lightPoint = glm::vec3(0.2f, 0.7f, 0.3f);
 	//lightPoint = glm::vec3(0,0.4,2);
@@ -12,6 +13,17 @@ RayTracer::RayTracer(int windowWidth, int windowHeight) {
 	sourceStrength = 2.0f;
 	maxBounces = 20;
 	textureMap = TextureMap("C:\\Users\\izami\\Documents\\UoBYr3\\Graphics\\wireframes\\texture.ppm");
+	std::cout << "djdj\n";
+	envMap = TextureMap("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\spacebox.ppm");
+
+
+	for (int y = 0; y < envMap.height; y++) {
+		std::vector<uint32_t> rowVals;
+		for (int x = 0; x < envMap.width; x++) {
+			rowVals.push_back(envMap.pixels.at(y * envMap.width + x));
+		}
+		map.push_back(rowVals);
+	}
 }
 
 glm::vec3 RayTracer::getRayDirection(CanvasPoint& point) {
@@ -201,6 +213,34 @@ std::pair<Colour, float> RayTracer::trace(glm::vec3& rayDir, glm::vec3 start, gl
 		//return trace(glm::normalize(refractRay), rayData.intersectionPoint, lightPos, bounce + 1);
 		
 	}
+	else if (rayData.intersectedTriangle.colour.environment) {
+		//std::cout << "here\n";
+		glm::vec3 reflectRay = glm::reflect(rayDir, pointNormal);
+
+		float m = 2.0f * sqrt( pow(reflectRay.x, 2) + pow(reflectRay.y , 2) + pow(reflectRay.z + 1, 2));
+
+		float u = ((reflectRay.x / m) + 0.5f) * envMap.width;
+		float v = ((reflectRay.y / m) + 0.5f) * envMap.height;
+
+		if (u > envMap.width - 1) u = envMap.width - 1;
+		if (v > envMap.height - 1) v = envMap.height - 1;
+		if (v < 0) v = 0;
+		if (u < 0) u = 0;
+		//return std::make_pair(envMap.getPixelColour(u,v), 1.0f);
+		//std::vector<std::vector<uint32_t>> map;
+		
+		//std::cout << u << " " << v << std::endl;
+		//std::cout << map.size() << " " << map[0].size() << std::endl;
+		uint32_t argb = map[v][u];
+		uint32_t red = (argb & 0x00FF0000) >> 16;
+		uint32_t green = (argb & 0x0000FF00) >> 8;
+		uint32_t blue = (argb & 0x000000FF);
+		return std::make_pair(Colour(red,blue,green), 1.0f);
+		//return std::make_pair(envMap.getEnvironmentPixelColour(reflectray), 1.0f);
+	}
+	/*else if (rayData.intersectedTriangle.colour.environment) {
+
+	}*/
 	else {
 		
 		glm::vec3 shadowRay = glm::normalize(rayData.intersectionPoint - lightPos);

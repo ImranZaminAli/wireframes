@@ -7,6 +7,7 @@
 #include "Camera.h"
 #include "CanvasPoint.h"
 #include "TextureMap.h"
+#include "EnvironmentMap.h"
 
 #define SCALE 700
 class RayTracer {
@@ -14,7 +15,9 @@ class RayTracer {
 	int height;
 	int maxBounces;
 	uint32_t black;
-	
+	//EnvironmentMap envMap;
+	TextureMap envMap;
+	std::vector<std::vector<uint32_t>> map;
 	//int lights;
 	std::vector<ModelTriangle>* triangles;
 	float sourceStrength;

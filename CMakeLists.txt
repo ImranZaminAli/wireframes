@@ -40,7 +40,7 @@ add_executable(wireframes
         libs/sdw/Rasteriser.cpp
         libs/sdw/Camera.cpp
         libs/sdw/RayTracer.cpp
-        src/wireframes.cpp "libs/sdw/Parser.cpp" "libs/sdw/Parser.h"  "libs/sdw/RayTracer.h" "libs/sdw/RayTracer.cpp")
+        src/wireframes.cpp "libs/sdw/Parser.cpp" "libs/sdw/Parser.h"  "libs/sdw/RayTracer.h" "libs/sdw/RayTracer.cpp" "libs/sdw/EnvironmentMap.h" "libs/sdw/EnvironmentMap.cpp")
 
 if (MSVC)
     target_compile_options(wireframes

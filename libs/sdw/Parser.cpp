@@ -15,7 +15,6 @@ Parser::Parser() {
 		}
 		else if (tokens[0] == "Kd") {
 			Colour colour = Colour(stof(tokens[1]) * maxColour, stof(tokens[2]) * maxColour, stof(tokens[3]) * maxColour);
-			//std::cout << colour <<  " " << currentColour << std::endl;
 			colours[currentColour] = colour;
 		}
 		else if (tokens[0] == "map_Kd") {
@@ -29,8 +28,12 @@ Parser::Parser() {
 			colours[currentColour].glass = true;
 			colours[currentColour].rf = stof(tokens[1]);
 		}
+		else if (tokens[0] == "env") {
+			colours[currentColour].environment = true;
+		}
 		
 	}
+
 
 	/*for (auto kv : colours) {
 		std::cout << kv.second << std::endl;
@@ -90,7 +93,6 @@ Parser::Parser() {
 	}
 
 
-
 	objStream.clear();
 	objStream.seekg(0);
 
@@ -124,9 +126,9 @@ Parser::Parser() {
 			triangles.push_back(tri);
 		}
 		else if (tokens[0] == "usemtl") {
-			std::cout << colours[tokens[1]] << std::endl;
 			colour = colours[tokens[1]];
 		}
 	}
+
 
 }
