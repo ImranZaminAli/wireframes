@@ -11,11 +11,14 @@
 #include "Utils.h"
 #include "Colour.h"
 
+using namespace std;
 
 class Parser {
-	const float scale = 0.17;
+	const float scale = .17f;
 	const float maxColour = 255.0f;
 	std::vector<glm::vec3> vertexNormals;
+	unordered_map<string, Colour> colours;
+	string nextLine;
 	
 public:
 	std::vector<glm::vec3> vertices;

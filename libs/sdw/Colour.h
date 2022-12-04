@@ -10,6 +10,7 @@ struct Colour {
 	bool textured;
 	bool mirror;
 	bool glass;
+	bool environment;
 	float rf;
 	uint32_t black;
 	Colour();

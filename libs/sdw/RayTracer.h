@@ -14,7 +14,7 @@ class RayTracer {
 	int height;
 	int maxBounces;
 	uint32_t black;
-	glm::vec3 lightPoint;
+	
 	//int lights;
 	std::vector<ModelTriangle>* triangles;
 	float sourceStrength;
@@ -26,14 +26,16 @@ class RayTracer {
 	void getClosestIntersection(glm::vec3 rayDir, RayTriangleIntersection& rayData, glm::vec3& pointNormal, glm::vec3 startPosition, bool first);
 	bool checkValid(float u, float v, float t);
 	glm::vec3 calculateIntersection(ModelTriangle triangle, glm::vec3& pointNormal, float u, float v);
-	std::pair<Colour, float> trace(glm::vec3& rayDir, glm::vec3 start, glm::vec3 lightPos, int bounce);
 	float calculateIntensity(float distance, glm::vec3 cameraRay, glm::vec3 shadowRay, glm::vec3 viewRay, ModelTriangle& tri, glm::vec3 pointNormal);
 	TextureMap textureMap;
-	glm::vec3 getRayDirection(CanvasPoint& point);
 	glm::vec3 getReflectedRay(glm::vec3& incidentRay, glm::vec3& normal);
 	void checkForBlockedLight(glm::vec3 rayDir, RayTriangleIntersection& rayData, glm::vec3& pointNormal, glm::vec3 startPosition);
+	glm::vec3 refract(glm::vec3& rayDir, glm::vec3 n, float rf);
+	float fresnel(glm::vec3& rayDir, glm::vec3 n, float rf);
 public:
+	glm::vec3 lightPoint;
 	RayTracer(int windowWidth, int windowHeight);
-
+	std::pair<Colour, float> trace(glm::vec3& rayDir, glm::vec3 start, glm::vec3 lightPos, int bounce, bool debug);
+	glm::vec3 getRayDirection(CanvasPoint& point);
 	void drawRayTracedImage(DrawingWindow* window, std::vector<ModelTriangle>* triangles, Camera* camera);
 };

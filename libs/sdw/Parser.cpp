@@ -1,9 +1,8 @@
 #include "Parser.h"
-using namespace std;
 
 Parser::Parser() {
-	unordered_map<string, Colour> colours;
-	string nextLine;
+	
+	
 	//ifstream mtlStream("cornell-box.mtl", ifstream::binary);
 	ifstream mtlStream("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\textured-cornell-box.mtl", ifstream::binary);
 	string currentColour;
@@ -16,6 +15,7 @@ Parser::Parser() {
 		}
 		else if (tokens[0] == "Kd") {
 			Colour colour = Colour(stof(tokens[1]) * maxColour, stof(tokens[2]) * maxColour, stof(tokens[3]) * maxColour);
+			//std::cout << colour <<  " " << currentColour << std::endl;
 			colours[currentColour] = colour;
 		}
 		else if (tokens[0] == "map_Kd") {
@@ -31,23 +31,34 @@ Parser::Parser() {
 		}
 		
 	}
-	
-	//ifstream objStream("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\textured-cornell-box.obj", ifstream::binary);
-	//ifstream objStream("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\textured-cornell-box-sphere.obj", ifstream::binary);
-	ifstream objStream("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\sphere.obj", ifstream::binary);
+
+	/*for (auto kv : colours) {
+		std::cout << kv.second << std::endl;
+	}*/
+	//std::cout << colours[" "] << std::endl;
+	//ifstream objStream("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\textured-cornell-box.obj");
+	ifstream objStream("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\textured-cornell-box.obj", ifstream::binary);
+	//ifstream objStream("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\sphere.obj", ifstream::binary);
 	//ifstream objStream("cornell-box.obj", ifstream::binary);
 	
+	//readObj("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\textured-cornell-box.obj", 1.0f);
+	//readObj("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\untitled.obj", 1.0f);
+	//readObj("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\untitled.obj", 1.0f);
+	//readObj("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\sphere.obj", 1.0f);
+	
+	//string file = "C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\untitled.obj";
+
 	Colour colour;
 	vector<TexturePoint> textureVertices;
+	
 	while (getline(objStream, nextLine)) {
-
 		auto tokens = split(nextLine, ' ');
 
 		if (tokens[0] == "v") {
 			glm::vec3 vertex;
 			vertex[0] = stof(tokens[1]); vertex[1] = stof(tokens[2]); vertex[2] = stof(tokens[3]);
 			vertices.push_back(vertex * scale );
-			vertexNormals.push_back(glm::vec3(0,0,0));
+			vertexNormals.push_back(glm::vec3(0, 0, 0));
 		}
 		else if (tokens[0] == "vt") {
 			TexturePoint textureVertex = TexturePoint(stof(tokens[1]), stof(tokens[2]));
@@ -73,30 +84,27 @@ Parser::Parser() {
 			}
 		}
 	}
-	
+
 	for (int i = 0; i < vertexNormals.size(); i++) {
 		vertexNormals[i] = glm::normalize(vertexNormals[i]);
 	}
 
 
-	
+
 	objStream.clear();
 	objStream.seekg(0);
 
 	while (getline(objStream, nextLine)) {
-		
+
 		auto tokens = split(nextLine, ' ');
-		
+
 		if (tokens[0] == "f") {
-			//vector<int> positions;
 			vector<glm::vec3> vertexNorms;
 			vector<glm::vec3> corners;
 			vector<TexturePoint> textureCoords;
 			for (int i = 1; i < 4; i++) {
 				auto indexes = split(tokens[i], '/');
-				//string position = indexes[0];
 				int vertexIndex = stoi(indexes[0]) - 1;
-				//positions.push_back(index);
 				vertexNorms.push_back(vertexNormals[vertexIndex]);
 				corners.push_back(vertices[vertexIndex]);
 				if (colour.textured) {
@@ -116,8 +124,9 @@ Parser::Parser() {
 			triangles.push_back(tri);
 		}
 		else if (tokens[0] == "usemtl") {
+			std::cout << colours[tokens[1]] << std::endl;
 			colour = colours[tokens[1]];
 		}
 	}
-}
 
+}

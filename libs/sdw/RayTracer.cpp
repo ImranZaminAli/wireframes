@@ -6,11 +6,11 @@ RayTracer::RayTracer(int windowWidth, int windowHeight) {
 	//lightPoint = glm::vec3(0, 0.1, 0.0);
 	//lightPoint = glm::vec3(0.2f, 0.7f, 0.3f);
 	//lightPoint = glm::vec3(0,0.4,2);
-	lightPoint = glm::vec3(0.2f, 1.2f, 2.0f);
-	//lightPoint = glm::vec3(0, 0.4, 0);
+	//lightPoint = glm::vec3(0.2f, 1.2f, 2.0f);
+	lightPoint = glm::vec3(0, 0.4, 0);
 	black = 0xFF000000;
 	sourceStrength = 2.0f;
-	maxBounces = 10;
+	maxBounces = 20;
 	textureMap = TextureMap("C:\\Users\\izami\\Documents\\UoBYr3\\Graphics\\wireframes\\texture.ppm");
 }
 
@@ -107,24 +107,59 @@ glm::vec3 RayTracer::getReflectedRay(glm::vec3& incidentRay, glm::vec3& normal) 
 }
 
 float RayTracer::calculateIntensity(float distance, glm::vec3 cameraRay, glm::vec3 shadowRay, glm::vec3 viewRay, ModelTriangle& tri, glm::vec3 pointNormal) {
-	glm::vec3 reflectedRay = glm::normalize(shadowRay - 2.0f * pointNormal * glm::dot(shadowRay,pointNormal));
-	//glm::vec3 reflectedRay = getReflectedRay(shadowRay, pointNormal);
-	float specularIntensity = std::powf(std::fmaxf(0.0f,glm::dot(reflectedRay, viewRay)), 64);
+	//glm::vec3 reflectedRay = glm::normalize(shadowRay - 2.0f * pointNormal * glm::dot(shadowRay,pointNormal));
+	glm::vec3 reflectedRay = glm::reflect(glm::normalize(shadowRay), pointNormal);
+	float specularIntensity = std::powf(std::fmaxf(0.0f,glm::dot(reflectedRay, viewRay)), 256);
 	
 	float inidenceAngle = glm::dot(shadowRay, pointNormal);
-	float proximityStrength = 2.2f; //1.5
+	float proximityStrength = 3.0f; //1.5
 	float proximityIntensity = 1/ (4 * M_PI * distance * distance);
 	//float proximityIntensity = 1.0f;
-	float incidentStrength = 6.0f; // 1.6
+	float incidentStrength = 3.2f; // 1.6
 	float specularStrength = 5.0f;
 	//float diffuseIntensity = fmaxf(proximityIntensity * proximityStrength, incidentStrength * inidenceAngle);
-	return glm::clamp(specularIntensity * specularStrength + 1.8f * incidentStrength * inidenceAngle * proximityIntensity * proximityStrength, 0.0f, 1.0f);
+	return glm::clamp(specularIntensity * specularStrength + incidentStrength * inidenceAngle * proximityIntensity * proximityStrength, 0.0f, 1.0f);
 }
 
-std::pair<Colour, float> RayTracer::trace(glm::vec3& rayDir, glm::vec3 start, glm::vec3 lightPos, int bounce) {
+glm::vec3 RayTracer::refract(glm::vec3& rayDir, glm::vec3 n, float rf) {
+	float cosi = glm::clamp(glm::dot(glm::normalize(rayDir), n), -1.0f, 1.0f);
+	float etai = 1, etat = rf;
+	glm::vec3 norm = n;
+	if (cosi < 0.0f) {
+		cosi *= -1;
+		
+	}
+	else {
+		std::swap(etai, etat);
+		norm *= -1;
+	}
+
+	float eta = etai / etat;
+	float k = 1 - eta * eta * (1 - cosi * cosi);
+	return k < 0 ? glm::vec3(0, 0, 0) : eta * rayDir + (eta * cosi - std::sqrtf(k)) * norm;
+}
+
+float RayTracer::fresnel(glm::vec3& rayDir, glm::vec3 n, float rf) {
+	float cosi = glm::clamp(glm::dot(rayDir, n), -1.0f, 1.0f);
+	float etai = 1;
+	float etat = rf;
+	if (cosi > 0) 
+		std::swap(etai, etat);
+	float sint = (etai / etat) * sqrtf(std::max(0.f, 1 - cosi * cosi));
+	if (sint >= 1) {  return 1.0f; }
+		//return 1.0f;
+	//std::cout << "na\n";
+	float cost = std::sqrtf(std::fmaxf(0.0f, 1 - sint * sint));
+	cosi = fabsf(cosi);
+	float Rs = ((etat * cosi) - (etai * cost)) / ((etat * cosi) + (etai * cost));
+	float Rp = ((etai * cosi) - (etat * cost)) / ((etai * cosi) + (etat * cost));
+	return (Rs * Rs + Rp * Rp) / 2;	
+}
+
+std::pair<Colour, float> RayTracer::trace(glm::vec3& rayDir, glm::vec3 start, glm::vec3 lightPos, int bounce, bool debug) {
 	if (bounce > maxBounces) {
 		//std::cout << "acheived\n";
-		return std::make_pair(Colour(0, 0, 0), 1.0f);
+		return std::make_pair(Colour(255, 255, 255), 1.0f);
 	}
 	RayTriangleIntersection rayData;
 	glm::vec3 pointNormal = glm::vec3(0, 0, 0);
@@ -137,31 +172,34 @@ std::pair<Colour, float> RayTracer::trace(glm::vec3& rayDir, glm::vec3 start, gl
 		//glm::vec3 reflectRay = -getReflectedRay(glm::normalize(rayDir),pointNormal);
 		glm::vec3 reflectRay = glm::reflect(glm::normalize(rayDir), pointNormal);
 		//std::cout << rayDir[0] << " " << rayDir[1] << " " << rayDir[2] << " " << reflectRay[0] << " " << reflectRay[1] << " " << reflectRay[2] << std::endl;
-		return trace(glm::normalize(reflectRay), rayData.intersectionPoint, lightPos, bounce + 1);
+		return trace(glm::normalize(reflectRay), rayData.intersectionPoint, lightPos, bounce + 1, debug);
 	}
 	else if (rayData.intersectedTriangle.colour.glass) {
-		/*glm::vec3 nRefr = rayData.intersectedTriangle.normal;
-		float cosi = glm::clamp(glm::dot(glm::normalize(rayDir), glm::normalize(nRefr)), -1.0f, 1.0f);
-		float etai = 1;
-		float etat = rayData.intersectedTriangle.colour.rf;
-		float kr;
-		if (cosi > 0) std::swap(etai, etat);
-		float sint = etai / etat * std::sqrtf(std::fmaxf(0.0f, 1 - cosi * cosi));
-		if (sint >= 1) {
-			kr = 1;
+		rayDir = glm::normalize(rayDir);
+		float kr = fresnel(rayDir, pointNormal, 1.5);
+		//bool outside = glm::dot(rayDir, pointNormal) < 0;
+		std::pair<Colour, float> refractValues;
+		//if (bounce == 0) std::cout << kr << std::endl;
+		if (kr < 1.0f) {
+			glm::vec3 refractRay = refract(rayDir, pointNormal, 1.5);
+			refractValues = trace(glm::normalize(refractRay), rayData.intersectionPoint, lightPos, bounce + 1, debug);
 		}
-		else {
-			float cost = std::sqrtf(std::fmaxf(0.0f, 1 - sint * sint));
-			cosi = std::fabsf(cosi);
-			float Rs = ((etat * cosi) - (etai * cost)) / ((etat * cosi) + (etai * cost));
-			float Rp = ((etai * cosi) - (etat * cost)) / ((etai * cosi) + (etat * cost));
-			kr = (Rs * Rs + Rp * Rp) / 2;
-		}
-
-		std::pair<Colour, float> refractionValue;
-		if (kr < 1) {
-			
-		}*/
+		//std::cout << kr << std::endl;
+		glm::vec3 reflectRay = glm::reflect(rayDir, pointNormal);
+		std::pair<Colour, float> reflectValues = trace(glm::normalize(reflectRay), rayData.intersectionPoint, lightPos, bounce + 1, debug);
+		Colour finalColour = refractValues.first;
+		finalColour.red *= (1-kr); finalColour.green *= (1- kr); finalColour.blue *= (1-kr);
+		finalColour.red += reflectValues.first.red * (kr);
+		finalColour.green += reflectValues.first.green * (kr);
+		finalColour.blue += reflectValues.first.blue * (kr);
+		if (finalColour.red > 255.0f) finalColour.red = 255.0f;
+		if (finalColour.green > 255.0f) finalColour.green = 255.0f;
+		if (finalColour.blue > 255.0f) finalColour.blue = 255.0f;
+		if(debug) std::cout << std::hex << finalColour.getArbg() << std::endl;
+		return std::make_pair(finalColour, (refractValues.second * (1-kr)+ reflectValues.second * kr));
+		//glm::vec3 refractRay = refract(rayDir, pointNormal, rayData.intersectedTriangle.colour.rf);
+		//return trace(glm::normalize(refractRay), rayData.intersectionPoint, lightPos, bounce + 1);
+		
 	}
 	else {
 		
@@ -187,13 +225,9 @@ std::pair<Colour, float> RayTracer::trace(glm::vec3& rayDir, glm::vec3 start, gl
 			coord += -(texturePoints[2] - texturePoints[0]) * rayData.v * (float) textureMap.height;
 			int x = std::floorf(coord[0]);
 			int y = std::floorf(coord[1]);
-			long index = textureMap.width * y + x;
-			uint32_t argb = 0xFF000000;
-			uint32_t red = (textureMap.pixels[index] & 0x00FF0000) >> 16;
-			uint32_t green = (textureMap.pixels[index] & 0x0000FF00) >> 8;
-			uint32_t blue = (textureMap.pixels[index] & 0x000000FF);
 			
-			return std::make_pair(Colour(red, green, blue), intensity);
+			
+			return std::make_pair(textureMap.getPixelColour(x,y) , intensity);
 
 		}
 		else {
@@ -218,7 +252,7 @@ void RayTracer::drawRayTracedImage(DrawingWindow* window, std::vector<ModelTrian
 		    CanvasPoint point = CanvasPoint(j,i, camera->focalLength);
 			for (int i = 0; i < lights.size(); i++) {
 				glm::vec3 rayDir = getRayDirection(point);
-				std::pair<Colour, float> colourVal = trace(glm::normalize(rayDir), camera->position, lights[i], 0);
+				std::pair<Colour, float> colourVal = trace(glm::normalize(rayDir), camera->position, lights[i], 0, false);
 				colour = colourVal.first;
 				intensity += colourVal.second;
 			}

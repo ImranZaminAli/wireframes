@@ -32,7 +32,7 @@ Rasteriser rasteriser = Rasteriser();
 Parser parser = Parser();
 RayTracer rayTracer = RayTracer(WIDTH, HEIGHT);
 array<array<float, WIDTH>, HEIGHT> buffer{};
-DrawMode mode = DrawMode::rayTrace;
+DrawMode mode = DrawMode::wireframe;
 
 
 vector<float> interpolateSingleFloats(float from, float to, size_t numberOfValues){
@@ -202,6 +202,9 @@ void handleEvent(SDL_Event event, DrawingWindow &window) {
 		draw(window);
 		window.renderFrame();
 	} else if (event.type == SDL_MOUSEBUTTONDOWN) {
+		CanvasPoint point = CanvasPoint(event.button.x, event.button.y, camera.focalLength);
+		rayTracer.trace(rayTracer.getRayDirection(point), camera.position, rayTracer.lightPoint, 0, true);
+		
 		window.savePPM("output.ppm");
 		window.saveBMP("output.bmp");
 	}
@@ -223,6 +226,9 @@ int main(int argc, char *argv[]) {
 	//bool method = false;
 	//draw(window);
 	//rayTracer.drawRayTracedImage(&window, &parser.triangles, &camera);
+
+	
+
 	draw(window);
 	
 	/*CanvasPoint a = CanvasPoint(170, 10);
@@ -238,7 +244,6 @@ int main(int argc, char *argv[]) {
 	orderTriPoints(tri);*/
 	//rasteriser.drawStrokedTriangle(window, tri, Colour(255,255,255), buffer);
 	//rasteriser.drawTexturedTriangle(window, tri, buffer);
-
 
 	window.renderFrame();
 	while (true) {
