@@ -34,7 +34,7 @@ Rasteriser rasteriser = Rasteriser();
 Parser parser = Parser();
 RayTracer rayTracer = RayTracer(WIDTH, HEIGHT);
 array<array<float, 640>, 480> buffer{};
-DrawMode mode = DrawMode::fill;
+DrawMode mode = DrawMode::rayTrace;
 DrawingWindow window = DrawingWindow(WIDTH, HEIGHT, false);
 
 vector<float> interpolateSingleFloats(float from, float to, size_t numberOfValues){
@@ -225,7 +225,6 @@ void handleEvent(SDL_Event event) {
 		//renderOption? draw(window) : rayTracer.drawRayTracedImage(&window, &parser.triangles, &camera);
 		draw();
 		window.renderFrame();
-        cout << "done\n";
 	} else if (event.type == SDL_MOUSEBUTTONDOWN) {
 		//CanvasPoint point = CanvasPoint(event.button.x, event.button.y, camera.focalLength);
 		//rayTracer.trace(rayTracer.getRayDirection(point), camera.position, rayTracer.lightPoint, 0, true);
@@ -277,7 +276,7 @@ int main(int argc, char *argv[]) {
 
     /// lighting
     //cout << 0.4 / 0.02 << endl;
-    mode = DrawMode::rayTrace;
+    /*mode = DrawMode::rayTrace;
     int lightMoved = (int) (0.4/0.01);
 
     for(int i = 0; i < pauseTime + pauseTime + lightMoved; i++){
@@ -291,7 +290,7 @@ int main(int argc, char *argv[]) {
         }
         window.savePPM("frames/lighting/" + std::to_string((int) i) + ".ppm");
         cout << "finished frame: " << i << endl;
-    }
+    }*/
     /*for(int i = 0; i < )
     for(int i = ; i <= (int) (0.4/0.01) + 25; i++){
         draw(window);
@@ -319,9 +318,42 @@ int main(int argc, char *argv[]) {
     //draw(index);
     //window.renderFrame();
 
+    ///bumpMaps
+    /*mode = DrawMode::rayTrace;
+    camera.moveCamera(Direction::rotateX, glm::radians(21.0f));
+    draw(index);
+    window.renderFrame();
+    for(int i = 0; i <= pauseTime + 32;i++){
 
+
+        if(i >= pauseTime){
+            window.clearPixels();
+            draw(index);
+            window.renderFrame();
+            camera.moveCamera(Direction::rotateX, glm::radians(-0.5f));
+        }
+        window.savePPM("frames/bumpMaps/" + std::to_string((int) i) + ".ppm");
+        cout << "finished frame: " << i << endl;
+    }*/
+
+    ///textureMaps
+    mode = DrawMode::rayTrace;
+    for(int i = 0; i < 42 + (int) (pauseTime/2); i++){
+        if(i < 42){
+            draw(index);
+            window.renderFrame();
+            camera.moveCamera(Direction::rotateX, glm::radians(0.5f));
+        }
+        window.savePPM("frames/texture/"+ std::to_string((int) i) + ".ppm");
+        cout << "finished frame: " << i << endl;
+    }
+
+    /*draw(index);
+    window.renderFrame();*/
 	//window.renderFrame();
     //window.savePPM("output.ppm");
+
+    cout << "FINISHED\n";
 	while (true) {
 		// We MUST poll for events - otherwise the window will freeze !
 		if (window.pollForInputEvents(event)) handleEvent(event);
