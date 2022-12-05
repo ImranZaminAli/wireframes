@@ -238,8 +238,8 @@ int main(int argc, char *argv[]) {
 
         window.clearPixels();
         emptyBuffer();
-        if(i == 360/6)
-            mode == DrawMode::fill;
+        if(i*3 == 180)
+            mode = DrawMode::fill;
     }
 
     //draw(window);
