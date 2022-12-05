@@ -18,6 +18,7 @@
 #include <Enums.cpp>
 #include <RayTracer.h>
 #include <TexturePoint.h>
+#include <unistd.h>
 
 // 320 240
 #define WIDTH 400
@@ -32,7 +33,7 @@ Rasteriser rasteriser = Rasteriser();
 Parser parser = Parser();
 RayTracer rayTracer = RayTracer(WIDTH, HEIGHT);
 array<array<float, WIDTH>, HEIGHT> buffer{};
-DrawMode mode = DrawMode::rayTrace;
+DrawMode mode = DrawMode::fill;
 
 
 vector<float> interpolateSingleFloats(float from, float to, size_t numberOfValues){
@@ -181,7 +182,7 @@ void cycleMode() {
 
 void handleEvent(SDL_Event event, DrawingWindow &window) {
     float stepSize = 0.2;
-    float angle = glm::radians(2.5);
+    float angle = glm::radians(3.0f);
     window.clearPixels();
     if (event.type == SDL_KEYDOWN) {
 		emptyBuffer();
@@ -203,9 +204,9 @@ void handleEvent(SDL_Event event, DrawingWindow &window) {
 	} else if (event.type == SDL_MOUSEBUTTONDOWN) {
 		//CanvasPoint point = CanvasPoint(event.button.x, event.button.y, camera.focalLength);
 		//rayTracer.trace(rayTracer.getRayDirection(point), camera.position, rayTracer.lightPoint, 0, true);
-		
-		window.savePPM("output.ppm");
-		window.saveBMP("output.bmp");
+        cout << "saving\n";
+		window.savePPM("output1.ppm");
+		cout << "saved\n";
 	}
 }
 
@@ -215,11 +216,35 @@ int main(int argc, char *argv[]) {
 	//srand((unsigned int) time(NULL));
 	DrawingWindow window = DrawingWindow(WIDTH, HEIGHT, false);
 	SDL_Event event;
+    /*float maxRotate = 360;
+    float degrees = 3;
+    for (float i = 0; i < maxRotate/degrees; ++i) {
+        float angle = glm::radians(degrees * i);
+        camera.moveCamera(Direction::rotateY, angle);
+        draw(window);
+        window.renderFrame();
+        //window.savePPM("frames/" + std::to_string(i) + ".ppm");
+        usleep(100000);
+        window.clearPixels();
+        cout << "finished frame: " << i<< endl;
+    }*/
 
+    for(float i = 0; i < 360/2.5; i++){
+        float angle = glm::radians(2.5);
+        camera.moveCamera(Direction::rotateY, angle);
+        draw(window);
+        window.renderFrame();
+        window.savePPM("frames/" + std::to_string(i) + ".ppm");
 
-	draw(window);
+        window.clearPixels();
+        emptyBuffer();
+    }
+
+    //draw(window);
+
 
 	window.renderFrame();
+    //window.savePPM("output.ppm");
 	while (true) {
 		// We MUST poll for events - otherwise the window will freeze !
 		if (window.pollForInputEvents(event)) handleEvent(event, window);
