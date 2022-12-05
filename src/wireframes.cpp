@@ -277,7 +277,8 @@ int main(int argc, char *argv[]) {
 
     /// lighting
     //cout << 0.4 / 0.02 << endl;
-    /*int lightMoved = (int) (0.4/0.01);
+    mode = DrawMode::rayTrace;
+    int lightMoved = (int) (0.4/0.01);
 
     for(int i = 0; i < pauseTime + pauseTime + lightMoved; i++){
         draw();
@@ -307,13 +308,13 @@ int main(int argc, char *argv[]) {
 
 
     /// soft shadows
-    mode = DrawMode::rayTrace;
+    /*mode = DrawMode::rayTrace;
     draw(index);
     window.renderFrame();
     for(int i = 0; i < 25 + 11; i++){
         window.savePPM("frames/shadows/" + std::to_string((int) i) + ".ppm");
         cout << "finished frame: " << i << endl;
-    }
+    }*/
 
     //draw(index);
     //window.renderFrame();
