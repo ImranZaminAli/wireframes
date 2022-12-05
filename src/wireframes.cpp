@@ -323,14 +323,19 @@ int main(int argc, char *argv[]) {
     camera.moveCamera(Direction::rotateX, glm::radians(21.0f));
     draw(index);
     window.renderFrame();
-    for(int i = 0; i <= pauseTime + 64;i++){
+    cout << pauseTime + 64 << endl;
+    for(int i = 0; i <= pauseTime + pauseTime + 64;i++){
 
 
-        if(i >= pauseTime){
+        if(i >= pauseTime && i < pauseTime + 64){
+
             window.clearPixels();
             draw(index);
             window.renderFrame();
             camera.moveCamera(Direction::rotateX, glm::radians(-0.25f));
+        }
+        else{
+            cout << i << endl;
         }
         window.savePPM("frames/bumpMaps/" + std::to_string((int) i) + ".ppm");
         cout << "finished frame: " << i << endl;
