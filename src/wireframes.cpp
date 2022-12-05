@@ -221,15 +221,32 @@ int main(int argc, char *argv[]) {
 
     /// lighting
     //cout << 0.4 / 0.02 << endl;
-    for(int i = 0; i <= (int) (0.4/0.02); i++){
-        cout << i << endl;
+    int lightMoved = (int) (0.4/0.01);
+    int pauseTime = 25/2;
+    for(int i = 0; i < pauseTime + pauseTime + lightMoved; i++){
+        draw(window);
+        window.renderFrame();
+
+        if(i >= pauseTime && i < pauseTime + lightMoved){
+            window.clearPixels();
+            rayTracer.lightPoint.x += 0.001;
+            draw(window);
+        }
+        window.savePPM("frames/lighting/" + std::to_string((int) i) + ".ppm");
+    }
+    /*for(int i = 0; i < )
+    for(int i = ; i <= (int) (0.4/0.01) + 25; i++){
         draw(window);
         window.renderFrame();
         window.savePPM("frames/lighting/" + std::to_string((int) i) + ".ppm");
-        rayTracer.lightPoint.x += 0.02;
+
         window.clearPixels();
         cout << "finished frame : " << i << endl;
     }
+
+    for(int i = (int) (0.4/0.01); i < (int) (0.4/0.01) + 25; i++){
+
+    }*/
 
     //draw(window);
 

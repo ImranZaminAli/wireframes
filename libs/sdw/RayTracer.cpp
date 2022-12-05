@@ -146,7 +146,7 @@ glm::vec3 RayTracer::getReflectedRay(glm::vec3& incidentRay, glm::vec3& normal) 
 float RayTracer::calculateIntensity(float distance, glm::vec3 cameraRay, glm::vec3 shadowRay, glm::vec3 viewRay, ModelTriangle& tri, glm::vec3 pointNormal, bool& specular) {
 	//glm::vec3 reflectedRay = glm::normalize(shadowRay - 2.0f * pointNormal * glm::dot(shadowRay,pointNormal));
 	glm::vec3 reflectedRay = glm::reflect(glm::normalize(shadowRay), pointNormal);
-	float specularIntensity = powf(std::fmaxf(0.0f,glm::dot(reflectedRay, viewRay)), 256);
+	float specularIntensity = powf(std::fmaxf(0.0f,glm::dot(reflectedRay, viewRay)), 160);
 	
 	float inidenceAngle = glm::dot(shadowRay, pointNormal);
 	//float proximityStrength = 3.0f; //1.5
