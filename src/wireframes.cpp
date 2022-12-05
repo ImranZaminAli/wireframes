@@ -229,10 +229,11 @@ int main(int argc, char *argv[]) {
 
         if(i >= pauseTime && i < pauseTime + lightMoved){
             window.clearPixels();
-            rayTracer.lightPoint.x += 0.001;
+            rayTracer.lightPoint.x += 0.01;
             draw(window);
         }
         window.savePPM("frames/lighting/" + std::to_string((int) i) + ".ppm");
+        cout << "finished frame: " << i << endl;
     }
     /*for(int i = 0; i < )
     for(int i = ; i <= (int) (0.4/0.01) + 25; i++){
