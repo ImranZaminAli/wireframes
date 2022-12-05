@@ -8,7 +8,7 @@ RayTracer::RayTracer(int windowWidth, int windowHeight) {
 	//lightPoint = glm::vec3(0.2f, 0.7f, 0.3f);
 	//lightPoint = glm::vec3(0,0.4,2);
 	//lightPoint = glm::vec3(0.2f, 1.2f, 2.0f);
-	lightPoint = glm::vec3(0.0, 0.4, 0.f);
+	lightPoint = glm::vec3(0.0, 0.4, 0.0f);
 	black = 0xFF000000;
 	sourceStrength = 2.0f;
 	maxBounces = 20;
@@ -134,6 +134,7 @@ void RayTracer::checkForBlockedLight(glm::vec3 rayDir, RayTriangleIntersection& 
 			rayData.intersectionPoint = calculateIntersection((*triangles)[i], pointNormal, possibleSolution[1], possibleSolution[2]);
 			rayData.u = possibleSolution[1];
 			rayData.v = possibleSolution[2];
+
 		}
 	}
 }
@@ -307,6 +308,32 @@ void RayTracer::drawRayTracedImage(DrawingWindow* window, std::vector<ModelTrian
 	this->camera = camera;
 	std::vector<glm::vec3> lights;
 	lights.push_back(lightPoint);
+    float offset = 0.05f;
+    lights.push_back(lightPoint + glm::vec3(offset, 0,0));
+    lights.push_back(lightPoint + glm::vec3(-offset, 0,0));
+    lights.push_back(lightPoint + glm::vec3(0,0,offset));
+    lights.push_back(lightPoint + glm::vec3(0,0,-offset));
+    lights.push_back(lightPoint + glm::vec3(offset * 2.0f, 0,0));
+    lights.push_back(lightPoint + glm::vec3(-offset* 2.0f, 0,0));
+    lights.push_back(lightPoint + glm::vec3(0,0,offset* 2.0f));
+    lights.push_back(lightPoint + glm::vec3(0,0,-offset* 2.0f));
+    //lights.push_back(lightPoint + glm::vec3(0,offset,0));
+    //lights.push_back(lightPoint + glm::vec3(0,-offset,0));
+
+    /*lights.push_back(lightPoint + glm::vec3(offset,0,offset));
+    lights.push_back(lightPoint + glm::vec3(-offset,0,offset));
+    lights.push_back(lightPoint + glm::vec3(offset,0,-offset));
+    lights.push_back(lightPoint + glm::vec3(-offset,0,offset));*/
+
+    /*lights.push_back(lightPoint + glm::vec3(0,offset,offset));
+    lights.push_back(lightPoint + glm::vec3(0,-offset,offset));
+    lights.push_back(lightPoint + glm::vec3(0,offset,-offset));
+    lights.push_back(lightPoint + glm::vec3(0,-offset,offset));
+
+    lights.push_back(lightPoint + glm::vec3(offset,offset,0));
+    lights.push_back(lightPoint + glm::vec3(-offset,offset,0));
+    lights.push_back(lightPoint + glm::vec3(offset,-offset,0));
+    lights.push_back(lightPoint + glm::vec3(-offset,offset,0));*/
 	//lights.push_back(lights[0] + glm::vec3(0.15, 0.0, 0.0));
 	//lights.push_back(lights[1] + glm::vec3(0.15, 0.0, 0.0));
 	

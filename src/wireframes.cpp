@@ -34,7 +34,7 @@ Rasteriser rasteriser = Rasteriser();
 Parser parser = Parser();
 RayTracer rayTracer = RayTracer(WIDTH, HEIGHT);
 array<array<float, 640>, 480> buffer{};
-DrawMode mode = DrawMode::wireframe;
+DrawMode mode = DrawMode::fill;
 DrawingWindow window = DrawingWindow(WIDTH, HEIGHT, false);
 
 vector<float> interpolateSingleFloats(float from, float to, size_t numberOfValues){
@@ -184,12 +184,8 @@ void draw(vector<float>& indexes){
 }
 
 void emptyBuffer() {
-    cout << buffer.size() << endl;
-    cout << buffer[0].size() << endl;
 	for (int i = 0; i < buffer.size(); i++){
-        cout << "in first loop\n";
 		for (int j = 0; j < buffer[i].size(); j++){
-            //cout << j << " " << i << endl;
 			buffer[i][j] = 0;
 		}
 	}
@@ -229,6 +225,7 @@ void handleEvent(SDL_Event event) {
 		//renderOption? draw(window) : rayTracer.drawRayTracedImage(&window, &parser.triangles, &camera);
 		draw();
 		window.renderFrame();
+        cout << "done\n";
 	} else if (event.type == SDL_MOUSEBUTTONDOWN) {
 		//CanvasPoint point = CanvasPoint(event.button.x, event.button.y, camera.focalLength);
 		//rayTracer.trace(rayTracer.getRayDirection(point), camera.position, rayTracer.lightPoint, 0, true);
@@ -247,6 +244,7 @@ int main(int argc, char *argv[]) {
     int pauseTime = 25/2;
     vector<float> index = interpolateSingleFloats(0.0f, (float) HEIGHT, 7);
     /// rasteriser
+    /*
     for(float i = 0; i < (int) (360/3) + pauseTime + pauseTime; i++){
         draw();
         window.renderFrame();
@@ -275,11 +273,11 @@ int main(int argc, char *argv[]) {
         emptyBuffer();
     }
 
-    mode = DrawMode::rayTrace;
+    mode = DrawMode::rayTrace;*/
 
     /// lighting
     //cout << 0.4 / 0.02 << endl;
-    int lightMoved = (int) (0.4/0.01);
+    /*int lightMoved = (int) (0.4/0.01);
 
     for(int i = 0; i < pauseTime + pauseTime + lightMoved; i++){
         draw();
@@ -301,19 +299,26 @@ int main(int argc, char *argv[]) {
 
         window.clearPixels();
         cout << "finished frame : " << i << endl;
-    }
-
-    for(int i = (int) (0.4/0.01); i < (int) (0.4/0.01) + 25; i++){
-
     }*/
+
+
 
     //draw(window);
 
 
-
+    /// soft shadows
+    mode = DrawMode::rayTrace;
+    draw(index);
     window.renderFrame();
+    for(int i = 0; i < 25 + 11; i++){
+        window.savePPM("frames/shadows/" + std::to_string((int) i) + ".ppm");
+        cout << "finished frame: " << i << endl;
+    }
 
-    cout << "FINISHED!\n";
+    //draw(index);
+    //window.renderFrame();
+
+
 	//window.renderFrame();
     //window.savePPM("output.ppm");
 	while (true) {
