@@ -27,5 +27,14 @@ uint32_t Colour::getArbg() {
 }
 
 uint32_t Colour::getArbg(float intensity) {
-    return (255 << 24) + (int(red * intensity) << 16) + (int(green * intensity) << 8) + (int(blue * intensity));
+    float r = red * intensity;
+    float g = green * intensity;
+    float b = blue * intensity;
+    if(r > 255)
+        r = 255;
+    if(g > 255)
+        g = 255;
+    if(b > 255)
+        b = 255;
+    return (255 << 24) + (int(r) << 16) + (int(g) << 8) + (int(b));
 }

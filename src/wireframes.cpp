@@ -33,7 +33,7 @@ Rasteriser rasteriser = Rasteriser();
 Parser parser = Parser();
 RayTracer rayTracer = RayTracer(WIDTH, HEIGHT);
 array<array<float, WIDTH>, HEIGHT> buffer{};
-DrawMode mode = DrawMode::wireframe;
+DrawMode mode = DrawMode::rayTrace;
 
 
 vector<float> interpolateSingleFloats(float from, float to, size_t numberOfValues){
@@ -133,25 +133,7 @@ void drawTriangle(DrawingWindow& window, ModelTriangle& tri, array<array<float, 
 }
 
 void draw(DrawingWindow &window){
-    //array<array<float, WIDTH>, HEIGHT> buffer {};
 
-	/*switch (mode)
-	{
-	case wireframe:
-		for (int i = 0; i < parser.triangles.size(); i++) {
-			
-		}
-		break;
-	case fill:
-		for (int i = 0; i < parser.triangles.size(); i++) {
-			drawTriangle(window, parser.triangles[i], buffer);
-		}
-		break;
-	case rayTrace:
-		break;
-	default:
-		break;
-	}*/
 	if (mode == DrawMode::wireframe || mode == DrawMode::fill) {
 		for (int i = 0; i < parser.triangles.size(); i++) {
 			drawTriangle(window, parser.triangles[i], buffer);
@@ -195,6 +177,10 @@ void handleEvent(SDL_Event event, DrawingWindow &window) {
         else if (event.key.keysym.sym == SDLK_a) {camera.moveCamera(Direction::rotateX, angle);}
 		else if (event.key.keysym.sym == SDLK_d) {camera.moveCamera(Direction::rotateY, angle);}
 		else if (event.key.keysym.sym == SDLK_p) { cycleMode(); }
+        else if (event.key.keysym.sym == SDLK_c) {rayTracer.proximityStrength += 0.2f; cout << "proximity: " << rayTracer.proximityStrength << endl;}
+        else if (event.key.keysym.sym == SDLK_v) {rayTracer.proximityStrength -= 0.2f; cout << "proximity: " << rayTracer.proximityStrength << endl;}
+        else if (event.key.keysym.sym == SDLK_b) {rayTracer.incidentStrength += 0.2f; cout << "incident: " << rayTracer.incidentStrength << endl;}
+        else if (event.key.keysym.sym == SDLK_n) {rayTracer.incidentStrength -= 0.2f; cout << "incident: " << rayTracer.incidentStrength << endl;}
 		//camera.lookAt();
         
         //draw(window);
@@ -216,20 +202,9 @@ int main(int argc, char *argv[]) {
 	//srand((unsigned int) time(NULL));
 	DrawingWindow window = DrawingWindow(WIDTH, HEIGHT, false);
 	SDL_Event event;
-    /*float maxRotate = 360;
-    float degrees = 3;
-    for (float i = 0; i < maxRotate/degrees; ++i) {
-        float angle = glm::radians(degrees * i);
-        camera.moveCamera(Direction::rotateY, angle);
-        draw(window);
-        window.renderFrame();
-        //window.savePPM("frames/" + std::to_string(i) + ".ppm");
-        usleep(100000);
-        window.clearPixels();
-        cout << "finished frame: " << i<< endl;
-    }*/
 
-    for(float i = 0; i < 360/3; i++){
+    /// rasteriser
+    /*for(float i = 0; i < 360/3; i++){
         float angle = glm::radians(3.0);
         camera.moveCamera(Direction::rotateY, angle);
         draw(window);
@@ -240,12 +215,26 @@ int main(int argc, char *argv[]) {
         emptyBuffer();
         if(i*3 == 180)
             mode = DrawMode::fill;
+
+        cout << "finished frame: " << i << endl;
+    }*/
+
+    /// lighting
+    //cout << 0.4 / 0.02 << endl;
+    for(int i = 0; i <= (int) (0.4/0.02); i++){
+        cout << i << endl;
+        draw(window);
+        window.renderFrame();
+        window.savePPM("frames/lighting/" + std::to_string((int) i) + ".ppm");
+        rayTracer.lightPoint.x += 0.02;
+        window.clearPixels();
+        cout << "finished frame : " << i << endl;
     }
 
     //draw(window);
 
-
-	window.renderFrame();
+    cout << "FINISHED!\n";
+	//window.renderFrame();
     //window.savePPM("output.ppm");
 	while (true) {
 		// We MUST poll for events - otherwise the window will freeze !
