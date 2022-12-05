@@ -319,34 +319,34 @@ int main(int argc, char *argv[]) {
     //window.renderFrame();
 
     ///bumpMaps
-    /*mode = DrawMode::rayTrace;
+    mode = DrawMode::rayTrace;
     camera.moveCamera(Direction::rotateX, glm::radians(21.0f));
     draw(index);
     window.renderFrame();
-    for(int i = 0; i <= pauseTime + 32;i++){
+    for(int i = 0; i <= pauseTime + 64;i++){
 
 
         if(i >= pauseTime){
             window.clearPixels();
             draw(index);
             window.renderFrame();
-            camera.moveCamera(Direction::rotateX, glm::radians(-0.5f));
+            camera.moveCamera(Direction::rotateX, glm::radians(-0.25f));
         }
         window.savePPM("frames/bumpMaps/" + std::to_string((int) i) + ".ppm");
         cout << "finished frame: " << i << endl;
-    }*/
+    }
 
     ///textureMaps
-    mode = DrawMode::rayTrace;
-    for(int i = 0; i < 42 + (int) (pauseTime/2); i++){
+    /*mode = DrawMode::rayTrace;
+    for(int i = 0; i < 84 + (int) (pauseTime/2); i++){
         if(i < 42){
             draw(index);
             window.renderFrame();
-            camera.moveCamera(Direction::rotateX, glm::radians(0.5f));
+            camera.moveCamera(Direction::rotateX, glm::radians(0.25f));
         }
         window.savePPM("frames/texture/"+ std::to_string((int) i) + ".ppm");
         cout << "finished frame: " << i << endl;
-    }
+    }*/
 
     /*draw(index);
     window.renderFrame();*/
