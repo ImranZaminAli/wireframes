@@ -33,7 +33,7 @@ Rasteriser rasteriser = Rasteriser();
 Parser parser = Parser();
 RayTracer rayTracer = RayTracer(WIDTH, HEIGHT);
 array<array<float, WIDTH>, HEIGHT> buffer{};
-DrawMode mode = DrawMode::fill;
+DrawMode mode = DrawMode::wireframe;
 
 
 vector<float> interpolateSingleFloats(float from, float to, size_t numberOfValues){
@@ -229,15 +229,17 @@ int main(int argc, char *argv[]) {
         cout << "finished frame: " << i<< endl;
     }*/
 
-    for(float i = 0; i < 360/2.5; i++){
-        float angle = glm::radians(2.5);
+    for(float i = 0; i < 360/3; i++){
+        float angle = glm::radians(3.0);
         camera.moveCamera(Direction::rotateY, angle);
         draw(window);
         window.renderFrame();
-        window.savePPM("frames/" + std::to_string(i) + ".ppm");
+        window.savePPM("frames/" + std::to_string((int) i) + ".ppm");
 
         window.clearPixels();
         emptyBuffer();
+        if(i == 360/6)
+            mode == DrawMode::fill;
     }
 
     //draw(window);
