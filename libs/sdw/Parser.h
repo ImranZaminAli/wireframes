@@ -23,6 +23,7 @@ class Parser {
 public:
 	std::vector<glm::vec3> vertices;
 	std::vector<ModelTriangle> triangles;
+    //std::vector<std::vector<ModelTriangle>> trianglesSplit;
 	Parser();
 
 };

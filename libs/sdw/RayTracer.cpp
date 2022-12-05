@@ -34,8 +34,8 @@ glm::vec3 RayTracer::getRayDirection(CanvasPoint& point) {
 	float x, y, z;
 	z = -(*camera).focalLength;
 
-	x = ((point.x - (width / 2)) / SCALE) * -z;
-	y = ((point.y - (height / 2)) / SCALE) * z;
+	x = ((point.x - (width / 2)) / 700) * -z;
+	y = ((point.y - (height / 2)) / 700) * z;
 
 	rayDir = glm::vec3(x, y, z) * glm::inverse((*camera).orientation);
 	return rayDir;
@@ -301,7 +301,7 @@ std::pair<Colour, float> RayTracer::trace(glm::vec3& rayDir, glm::vec3 start, gl
 	}
 }
 
-void RayTracer::drawRayTracedImage(DrawingWindow* window, std::vector<ModelTriangle>* triangles, Camera* camera) {
+void RayTracer::drawRayTracedImage(DrawingWindow* window, std::vector<ModelTriangle>* triangles, Camera* camera, int start, int finish) {
 	this->window = window;
 	this->triangles = triangles;
 	this->camera = camera;
@@ -310,7 +310,7 @@ void RayTracer::drawRayTracedImage(DrawingWindow* window, std::vector<ModelTrian
 	//lights.push_back(lights[0] + glm::vec3(0.15, 0.0, 0.0));
 	//lights.push_back(lights[1] + glm::vec3(0.15, 0.0, 0.0));
 	
-	for (int i = 0; i < height; i++){
+	for (int i = start; i < finish; i++){
 		for (int j = 0; j < width; j++) {
 			Colour colour = Colour(0, 0, 0);
 			float intensity = 0;

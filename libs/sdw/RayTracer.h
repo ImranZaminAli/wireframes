@@ -9,7 +9,6 @@
 #include "TextureMap.h"
 #include "EnvironmentMap.h"
 
-#define SCALE 700
 class RayTracer {
 	int width;
 	int height;
@@ -44,5 +43,5 @@ public:
 	RayTracer(int windowWidth, int windowHeight);
 	std::pair<Colour, float> trace(glm::vec3& rayDir, glm::vec3 start, glm::vec3 lightPos, int bounce, bool debug, bool specular);
 	glm::vec3 getRayDirection(CanvasPoint& point);
-	void drawRayTracedImage(DrawingWindow* window, std::vector<ModelTriangle>* triangles, Camera* camera);
+	void drawRayTracedImage(DrawingWindow* window, std::vector<ModelTriangle>* triangles, Camera* camera, int start, int finish);
 };

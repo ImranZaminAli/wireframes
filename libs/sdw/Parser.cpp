@@ -1,7 +1,8 @@
 #include "Parser.h"
 
 Parser::Parser() {
-	
+
+
 	
 	ifstream mtlStream("textured-cornell-box.mtl", ifstream::binary);
 	//ifstream mtlStream("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\textured-cornell-box.mtl", ifstream::binary);
@@ -98,7 +99,7 @@ Parser::Parser() {
 
 	objStream.clear();
 	objStream.seekg(0);
-
+    int index = 0;
 	while (getline(objStream, nextLine)) {
 
 		auto tokens = split(nextLine, ' ');
@@ -127,6 +128,8 @@ Parser::Parser() {
 				tri.texturePoints[2] = textureCoords[2];
 			}
 			triangles.push_back(tri);
+
+
 		}
 		else if (tokens[0] == "usemtl") {
 			colour = colours[tokens[1]];

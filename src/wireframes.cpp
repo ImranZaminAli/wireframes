@@ -19,10 +19,11 @@
 #include <RayTracer.h>
 #include <TexturePoint.h>
 #include <unistd.h>
+#include <thread>
 
 // 320 240
-#define WIDTH 400
-#define HEIGHT 400
+#define WIDTH 640
+#define HEIGHT 480
 #define SCALE 300
 
 using namespace std;
@@ -32,9 +33,9 @@ Camera camera = Camera();
 Rasteriser rasteriser = Rasteriser();
 Parser parser = Parser();
 RayTracer rayTracer = RayTracer(WIDTH, HEIGHT);
-array<array<float, WIDTH>, HEIGHT> buffer{};
-DrawMode mode = DrawMode::rayTrace;
-
+array<array<float, 640>, 480> buffer{};
+DrawMode mode = DrawMode::wireframe;
+DrawingWindow window = DrawingWindow(WIDTH, HEIGHT, false);
 
 vector<float> interpolateSingleFloats(float from, float to, size_t numberOfValues){
 	vector<float> result;
@@ -67,7 +68,7 @@ vector<glm::vec3> interpolateThreeElementValues(glm::vec3 from, glm::vec3 to, si
 }
 
 // write a line of pixels to the window
-void write(DrawingWindow &window, vector<glm::vec3>* shades, int x, int y, size_t numberOfValues, bool vertical){
+void write( vector<glm::vec3>* shades, int x, int y, size_t numberOfValues, bool vertical){
 	vector<float> coords = interpolateSingleFloats(0, (vertical? HEIGHT : WIDTH), numberOfValues);
 	int index = 1;
 	
@@ -83,11 +84,11 @@ void write(DrawingWindow &window, vector<glm::vec3>* shades, int x, int y, size_
 	}
 }
 
-void makeBorders(DrawingWindow &window, glm::vec3 topLeft, glm::vec3 topRight, glm::vec3 botLeft, glm::vec3 botRight, vector<glm::vec3>* rightBorder, vector<glm::vec3>* leftBorder, size_t numberOfValues){
+void makeBorders(glm::vec3 topLeft, glm::vec3 topRight, glm::vec3 botLeft, glm::vec3 botRight, vector<glm::vec3>* rightBorder, vector<glm::vec3>* leftBorder, size_t numberOfValues){
 	*rightBorder = interpolateThreeElementValues(topRight, botRight, numberOfValues);
-	write(window, rightBorder, window.width -1, 0, numberOfValues, true);
+	write( rightBorder, window.width -1, 0, numberOfValues, true);
 	*leftBorder = interpolateThreeElementValues(topLeft, botLeft, numberOfValues);
-	write(window, leftBorder, 0,0, numberOfValues, true);
+	write( leftBorder, 0,0, numberOfValues, true);
 	
 	
 }
@@ -124,31 +125,72 @@ CanvasPoint getCanvasIntersectionPoint(glm::vec3 vertexPos) {
 
 }
 
-void drawTriangle(DrawingWindow& window, ModelTriangle& tri, array<array<float, HEIGHT>, WIDTH>& buffer) {
+void drawTriangle(ModelTriangle& tri, array<array<float, WIDTH>, HEIGHT>& buffer) {
 	CanvasTriangle triCan = CanvasTriangle(getCanvasIntersectionPoint(tri.vertices[0]), getCanvasIntersectionPoint(tri.vertices[1]), getCanvasIntersectionPoint(tri.vertices[2]));
     orderTriPoints(triCan);
 	if(mode == DrawMode::fill)
-		rasteriser.drawFilledTriangle(window, triCan, tri.colour, buffer);
+		rasteriser.drawFilledTriangle(window,  triCan, tri.colour, buffer);
     rasteriser.drawStrokedTriangle(window, triCan, tri.colour, buffer);
 }
 
-void draw(DrawingWindow &window){
+void draw(){
 
 	if (mode == DrawMode::wireframe || mode == DrawMode::fill) {
 		for (int i = 0; i < parser.triangles.size(); i++) {
-			drawTriangle(window, parser.triangles[i], buffer);
+			drawTriangle(parser.triangles[i], buffer);
 		}
 	}
 	else {
-		rayTracer.drawRayTracedImage(&window, &parser.triangles, &camera);
+		rayTracer.drawRayTracedImage(&window, &parser.triangles, &camera, 0, HEIGHT);
 	}
+
+}
+
+void call( float start, float finish){
+    rayTracer.drawRayTracedImage(&window, &parser.triangles, &camera, (int) start, (int) finish);
+}
+
+void draw(vector<float>& indexes){
+
+    if (mode == DrawMode::wireframe || mode == DrawMode::fill) {
+        for (int i = 0; i < parser.triangles.size(); i++) {
+            drawTriangle(parser.triangles[i], buffer);
+        }
+    }
+    else {
+        /*thread one (rayTracer.drawRayTracedImage(), &window, &parser.triangles, &camera, indexes[0], indexes[1]);
+        thread two (rayTracer.drawRayTracedImage(), &window, &parser.triangles, &camera, indexes[1], indexes[2]);
+        thread three (rayTracer.drawRayTracedImage(), &window, &parser.triangles, &camera, indexes[2], indexes[3]);
+        thread four (rayTracer.drawRayTracedImage(), &window, &parser.triangles, &camera, indexes[3], indexes[4]);
+        thread five (rayTracer.drawRayTracedImage(), &window, &parser.triangles, &camera, indexes[4], indexes[5]);
+        thread six (rayTracer.drawRayTracedImage(), &window, &parser.triangles, &camera, indexes[5], indexes[6]);*/
+        thread one (call,  indexes[0], indexes[1]);
+        thread two (call,  indexes[1], indexes[2]);
+        thread three (call,indexes[2], indexes[3]);
+        thread four (call,  indexes[3], indexes[4]);
+        thread five (call,  indexes[4], indexes[5]);
+        thread six (call, indexes[5], indexes[6]);
+
+
+        one.join();
+        two.join();
+        three.join();
+        four.join();
+        five.join();
+        six.join();
+        //rayTracer.drawRayTracedImage(&window, &parser.triangles, &camera);
+    }
 
 }
 
 void emptyBuffer() {
-	for (int i = 0; i < HEIGHT; i++){
-		for (int j = 0; j < WIDTH; j++){
-			buffer[j][i] = 0;
+    cout << buffer.size() << endl;
+    cout << buffer[0].size() << endl;
+	for (int i = 0; i < buffer.size(); i++){
+        cout << "in first loop\n";
+		for (int j = 0; j < buffer[i].size(); j++){
+            //cout << j << " " << i << endl;
+			buffer[i][j] = 0;
 		}
 	}
 }
@@ -162,7 +204,7 @@ void cycleMode() {
 		mode = DrawMode::wireframe;
 }
 
-void handleEvent(SDL_Event event, DrawingWindow &window) {
+void handleEvent(SDL_Event event) {
     float stepSize = 0.2;
     float angle = glm::radians(3.0f);
     window.clearPixels();
@@ -185,7 +227,7 @@ void handleEvent(SDL_Event event, DrawingWindow &window) {
         
         //draw(window);
 		//renderOption? draw(window) : rayTracer.drawRayTracedImage(&window, &parser.triangles, &camera);
-		draw(window);
+		draw();
 		window.renderFrame();
 	} else if (event.type == SDL_MOUSEBUTTONDOWN) {
 		//CanvasPoint point = CanvasPoint(event.button.x, event.button.y, camera.focalLength);
@@ -200,37 +242,53 @@ void handleEvent(SDL_Event event, DrawingWindow &window) {
 int main(int argc, char *argv[]) {
 	// uncomment line below for proper random
 	//srand((unsigned int) time(NULL));
-	DrawingWindow window = DrawingWindow(WIDTH, HEIGHT, false);
+
 	SDL_Event event;
-
+    int pauseTime = 25/2;
+    vector<float> index = interpolateSingleFloats(0.0f, (float) HEIGHT, 7);
     /// rasteriser
-    /*for(float i = 0; i < 360/3; i++){
-        float angle = glm::radians(3.0);
-        camera.moveCamera(Direction::rotateY, angle);
-        draw(window);
+    for(float i = 0; i < (int) (360/3) + pauseTime + pauseTime; i++){
+        draw();
         window.renderFrame();
-        window.savePPM("frames/" + std::to_string((int) i) + ".ppm");
+        buffer[0][0] = 0;
 
-        window.clearPixels();
-        emptyBuffer();
+        if(i < pauseTime){
+            window.savePPM("frames/rasteriser/" + std::to_string((int) i) + ".ppm");
+        }
+        else if(i >= pauseTime && i <= 120 + pauseTime) {
+            cout << "breaks here\n";
+            float angle = glm::radians(3.0);
+            camera.moveCamera(Direction::rotateY, angle);
+            window.savePPM("frames/rasteriser/" + std::to_string((int) i) + ".ppm");
+
+
+
+        }
+        else{
+            window.savePPM("frames/rasteriser/" + std::to_string((int) i) + ".ppm");
+        }
         if(i*3 == 180)
             mode = DrawMode::fill;
 
         cout << "finished frame: " << i << endl;
-    }*/
+        window.clearPixels();
+        emptyBuffer();
+    }
+
+    mode = DrawMode::rayTrace;
 
     /// lighting
     //cout << 0.4 / 0.02 << endl;
     int lightMoved = (int) (0.4/0.01);
-    int pauseTime = 25/2;
+
     for(int i = 0; i < pauseTime + pauseTime + lightMoved; i++){
-        draw(window);
+        draw();
         window.renderFrame();
 
         if(i >= pauseTime && i < pauseTime + lightMoved){
             window.clearPixels();
             rayTracer.lightPoint.x += 0.01;
-            draw(window);
+            draw( index);
         }
         window.savePPM("frames/lighting/" + std::to_string((int) i) + ".ppm");
         cout << "finished frame: " << i << endl;
@@ -251,12 +309,16 @@ int main(int argc, char *argv[]) {
 
     //draw(window);
 
+
+
+    window.renderFrame();
+
     cout << "FINISHED!\n";
 	//window.renderFrame();
     //window.savePPM("output.ppm");
 	while (true) {
 		// We MUST poll for events - otherwise the window will freeze !
-		if (window.pollForInputEvents(event)) handleEvent(event, window);
+		if (window.pollForInputEvents(event)) handleEvent(event);
 		// Need to render the frame at the end, or nothing actually gets shown on the screen !
 		//window.renderFrame();
 	}

@@ -10,8 +10,8 @@
 #include <array>
 #include <glm/glm.hpp>
 
-#define WIDTH 400
-#define HEIGHT 400
+#define WIDTH 640
+#define HEIGHT 480
 // -4.76395
 class Rasteriser{
     std::vector<uint32_t> pixels;
@@ -28,7 +28,7 @@ public:
     Rasteriser();
     void drawLine(DrawingWindow& window, CanvasPoint& start, CanvasPoint& finish, Colour& colour, std::array<std::array<float, WIDTH>, HEIGHT> &buffer);
     void drawTexturedLine(DrawingWindow& window, CanvasTriangle& tri, float area, CanvasPoint& start, CanvasPoint& finish);
-    void drawStrokedTriangle(DrawingWindow& window, CanvasTriangle& tri, Colour& colour , std::array<std::array<float, WIDTH>, HEIGHT> &buffer);
-    void drawFilledTriangle(DrawingWindow& window, CanvasTriangle &tri, Colour &colour, std::array<std::array<float, WIDTH>, HEIGHT> &buffer);
+    void drawStrokedTriangle(DrawingWindow& window, CanvasTriangle& tri, Colour& colour , std::array<std::array<float, WIDTH>, HEIGHT>& buffer);
+    void drawFilledTriangle(DrawingWindow& window, CanvasTriangle &tri, Colour &colour, std::array<std::array<float, WIDTH>, HEIGHT>& buffer);
     void drawTexturedTriangle(DrawingWindow& window, CanvasTriangle& tri, std::array<std::array<float, WIDTH>, HEIGHT>& buffer);
 };
