@@ -208,11 +208,13 @@ void handleEvent(SDL_Event event) {
 		emptyBuffer();
 		if (event.key.keysym.sym == SDLK_LEFT) {camera.moveCamera(Direction::right, -stepSize);}
 		else if (event.key.keysym.sym == SDLK_RIGHT) {camera.moveCamera(Direction::right, stepSize); }
-		else if (event.key.keysym.sym == SDLK_UP) {camera.moveCamera(Direction::up, stepSize); }
-		else if (event.key.keysym.sym == SDLK_DOWN) {camera.moveCamera(Direction::up, -stepSize); }
+		else if (event.key.keysym.sym == SDLK_UP) {camera.moveCamera(Direction::up, stepSize/2); }
+		else if (event.key.keysym.sym == SDLK_DOWN) {camera.moveCamera(Direction::up, -stepSize/2); }
         else if (event.key.keysym.sym == SDLK_w) {camera.moveCamera(Direction::forwards, stepSize); }
 		else if (event.key.keysym.sym == SDLK_s) {camera.moveCamera(Direction::forwards, -stepSize);}
-        else if (event.key.keysym.sym == SDLK_a) {camera.moveCamera(Direction::rotateX, angle);}
+        else if (event.key.keysym.sym == SDLK_a) {camera.moveCamera(Direction::rotateX, angle/2);}
+        else if (event.key.keysym.sym == SDLK_q) {camera.moveCamera(Direction::rotateX, -angle/2);}
+        else if (event.key.keysym.sym == SDLK_e) {camera.moveCamera(Direction::rotateY, -angle);}
 		else if (event.key.keysym.sym == SDLK_d) {camera.moveCamera(Direction::rotateY, angle);}
 		else if (event.key.keysym.sym == SDLK_p) { cycleMode(); }
         else if (event.key.keysym.sym == SDLK_c) {rayTracer.proximityStrength += 0.2f; cout << "proximity: " << rayTracer.proximityStrength << endl;}
@@ -220,7 +222,6 @@ void handleEvent(SDL_Event event) {
         else if (event.key.keysym.sym == SDLK_b) {rayTracer.incidentStrength += 0.2f; cout << "incident: " << rayTracer.incidentStrength << endl;}
         else if (event.key.keysym.sym == SDLK_n) {rayTracer.incidentStrength -= 0.2f; cout << "incident: " << rayTracer.incidentStrength << endl;}
 		//camera.lookAt();
-        
         //draw(window);
 		//renderOption? draw(window) : rayTracer.drawRayTracedImage(&window, &parser.triangles, &camera);
 		draw();
@@ -276,7 +277,7 @@ int main(int argc, char *argv[]) {
 
     /// lighting
     //cout << 0.4 / 0.02 << endl;
-    mode = DrawMode::rayTrace;
+    /*mode = DrawMode::rayTrace;
     int lightMoved = (int) (0.4/0.01);
     draw();
     window.renderFrame();
@@ -291,7 +292,7 @@ int main(int argc, char *argv[]) {
         }
         window.savePPM("frames/shadows/" + std::to_string((int) i) + ".ppm");
         cout << "finished frame: " << i << endl;
-    }
+    }*/
     /*for(int i = 0; i < )
     for(int i = ; i <= (int) (0.4/0.01) + 25; i++){
         draw(window);
@@ -353,11 +354,70 @@ int main(int argc, char *argv[]) {
         window.savePPM("frames/texture/"+ std::to_string((int) i) + ".ppm");
         cout << "finished frame: " << i << endl;
     }*/
+    //camera.moveCamera(Direction::rotateX, glm::radians(5.0f));
 
-    //draw(index);
-    //window.renderFrame();
-	//window.renderFrame();
+    /*camera.moveCamera(Direction::forwards, -2.0f);
+    camera.moveCamera(Direction::rotateY, glm::radians(3.0 * 10));
+    camera.moveCamera(Direction::up, 0.4f);
+    camera.moveCamera(Direction::rotateX, glm::radians(6.0));
+    camera.moveCamera(Direction::right, 0.2f);*/
+
+
+    /*float forwardStepSize = -2.0f/120.f;
+    for(int i = 0; i < 120;i++){
+        camera.moveCamera(Direction::forwards, forwardStepSize);
+        camera.moveCamera(Direction::rotateY, glm::radians(0.25));
+        camera.moveCamera(Direction::up, 0.4f / 120.0f);
+        camera.moveCamera(Direction::rotateX, glm::radians(6.0 / 120.f));
+        camera.moveCamera(Direction::right, 0.2f/120.f);
+    }
+
+    //camera.moveCamera(Direction::up, 0.4f);
+    //camera.moveCamera(Direction::right, 0.2f);
+    draw(index);
+	window.renderFrame();*/
+
+
     //window.savePPM("output.ppm");
+    int frameIndex = 0;
+    draw(index);
+    window.renderFrame();
+    for(int i = 0; i < pauseTime; i++){
+        window.savePPM("frames/mirrors/" + std::to_string((int) frameIndex) + ".ppm");
+        frameIndex++;
+        cout << "finished frame: " << frameIndex << endl;
+    }
+
+    for(float i = 0; i < 16 * 3;i++){
+        camera.moveCamera(Direction::forwards, -.049f);
+        camera.moveCamera(Direction::rotateY, glm::radians(1.0f));
+
+        draw(index);
+        window.renderFrame();
+        window.savePPM("frames/mirrors/" + std::to_string((int) frameIndex) + ".ppm");
+        frameIndex++;
+        cout << "finished frame: " << frameIndex << endl;
+    }
+
+    /*for(float i = 0; i < 5 * 3; i++){
+        camera.moveCamera
+    }*/
+
+    for(float i = 0; i < 4/0.25f; i++){
+        camera.moveCamera(Direction::rotateX, glm::radians(1.5f * .25f));
+        camera.moveCamera(Direction::up, 0.1f * .25f);
+        draw(index);
+        window.renderFrame();
+        window.savePPM("frames/mirrors/" + std::to_string((int) frameIndex) + ".ppm");
+        frameIndex++;
+        cout << "finished frame: " << frameIndex << endl;
+    }
+
+    for(int i = 0; i < pauseTime; i++){
+        window.savePPM("frames/mirrors/" + std::to_string((int) frameIndex) + ".ppm");
+        frameIndex++;
+        cout << "finished frame: " << frameIndex << endl;
+    }
 
     cout << "FINISHED\n";
 	while (true) {

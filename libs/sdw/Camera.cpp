@@ -14,13 +14,13 @@ void Camera::moveCamera(Direction direction, float value) {
     glm::mat3 rotate;
     switch (direction) {
         case Direction::forwards:
-            position = position + glm::vec3(0,0,value);
+            position = position + orientation * glm::vec3(0,0,value);
             break;
         case Direction::right:
-            position = position + glm::vec3(value,0,0);
+            position = position + orientation * glm::vec3(value,0,0);
             break;
         case Direction::up:
-            position = position + glm::vec3(0, value,0);
+            position = position + orientation * glm::vec3(0, value,0);
             break;
         case Direction::rotateX:
             sin = std::sin(value);

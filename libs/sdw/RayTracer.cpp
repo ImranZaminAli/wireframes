@@ -8,7 +8,7 @@ RayTracer::RayTracer(int windowWidth, int windowHeight) {
 	//lightPoint = glm::vec3(0.2f, 0.7f, 0.3f);
 	//lightPoint = glm::vec3(0,0.4,2);
 	//lightPoint = glm::vec3(0.2f, 1.2f, 2.0f);
-	lightPoint = glm::vec3(0.0f, 0.4f, 0.0f);
+	lightPoint = glm::vec3(0.0f, 0.35f, 0.0f);
 	//lightPoint = glm::vec3(0.0f, 0.2f, 0.5f);
 	black = 0xFF000000;
 	sourceStrength = 2.0f;
@@ -206,7 +206,7 @@ float RayTracer::fresnel(glm::vec3& rayDir, glm::vec3 n, float rf) {
 std::pair<Colour, float> RayTracer::trace(glm::vec3& rayDir, glm::vec3 start, glm::vec3 lightPos, int bounce, bool debug, bool specular) {
 
 	if (bounce > maxBounces) {
-		//std::cout << "acheived\n";
+		std::cout << "acheived\n";
 		return std::make_pair(Colour(255, 255, 255), 1.0f);
 	}
 	RayTriangleIntersection rayData;
@@ -214,7 +214,22 @@ std::pair<Colour, float> RayTracer::trace(glm::vec3& rayDir, glm::vec3 start, gl
 	getClosestIntersection(rayDir, rayData, pointNormal, start, true);
 
 	if (rayData.distanceFromCamera == INFINITY) {
-		return std::make_pair(Colour(0,0,0), 0.0f);
+		//return std::make_pair(Colour(0,0,0), 0.0f);
+        rayDir = glm::normalize(rayDir);
+        float m = 2.0f * sqrt( pow(rayDir.x, 2) + pow(rayDir.y , 2) + pow(rayDir.z + 1, 2));
+        float u = ((rayDir.x / m) + 0.5f) * envMap.width;
+        float v = ((rayDir.y / m) + 0.5f) * envMap.height;
+
+        if (u > envMap.width - 1) u = envMap.width - 1;
+        if (v > envMap.height - 1) v = envMap.height - 1;
+        if (v < 0) v = 0;
+        if (u < 0) u = 0;
+
+        uint32_t argb = map[v][u];
+        uint32_t red = (argb & 0x00FF0000) >> 16;
+        uint32_t green = (argb & 0x0000FF00) >> 8;
+        uint32_t blue = (argb & 0x000000FF);
+        return std::make_pair(Colour(red,blue,green), 1.0f);
 	}
 	else if (rayData.intersectedTriangle.colour.mirror) {
 		glm::vec3 reflectRay = glm::normalize(glm::reflect(glm::normalize(rayDir), pointNormal));
@@ -311,14 +326,14 @@ void RayTracer::drawRayTracedImage(DrawingWindow* window, std::vector<ModelTrian
 	std::vector<glm::vec3> lights;
 	lights.push_back(lightPoint);
     float offset = 0.05f;
-    lights.push_back(lightPoint + glm::vec3(offset, 0,0));
+    /*lights.push_back(lightPoint + glm::vec3(offset, 0,0));
     lights.push_back(lightPoint + glm::vec3(-offset, 0,0));
     lights.push_back(lightPoint + glm::vec3(0,0,offset));
     lights.push_back(lightPoint + glm::vec3(0,0,-offset));
     lights.push_back(lightPoint + glm::vec3(offset * 2.0f, 0,0));
     lights.push_back(lightPoint + glm::vec3(-offset* 2.0f, 0,0));
     lights.push_back(lightPoint + glm::vec3(0,0,offset* 2.0f));
-    lights.push_back(lightPoint + glm::vec3(0,0,-offset* 2.0f));
+    lights.push_back(lightPoint + glm::vec3(0,0,-offset* 2.0f));*/
 
 
     //lights.push_back(lightPoint + glm::vec3(0,offset,0));
@@ -353,7 +368,7 @@ void RayTracer::drawRayTracedImage(DrawingWindow* window, std::vector<ModelTrian
 				colour = colourVal.first;
 				intensity += colourVal.second;
 			}
-			window->setPixelColour(j,i,colour.getArbg(std::fmaxf( intensity/lights.size(), 0.2f)));
+			window->setPixelColour(j,i,colour.getArbg(std::fmaxf( intensity/lights.size(), 0.23f)));
 		}
 	}
 
