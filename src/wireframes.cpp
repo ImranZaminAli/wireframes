@@ -383,20 +383,22 @@ int main(int argc, char *argv[]) {
     draw(index);
     window.renderFrame();
     for(int i = 0; i < pauseTime * 2; i++){
-        window.savePPM("frames/mirrors/" + std::to_string((int) frameIndex) + ".ppm");
+        //window.savePPM("frames/mirrors/" + std::to_string((int) frameIndex) + ".ppm");
         frameIndex++;
-        cout << "finished frame: " << frameIndex << endl;
+        //cout << "finished frame: " << frameIndex << endl;
     }
 
     for(float i = 0; i < 16 * 3 * 2;i++){
         camera.moveCamera(Direction::forwards, -.049f * .5f);
         camera.moveCamera(Direction::rotateY, glm::radians(1.0f * .5f));
 
+        if(frameIndex >= 93){
         draw(index);
         window.renderFrame();
-        window.savePPM("frames/mirrors/" + std::to_string((int) frameIndex) + ".ppm");
+        window.savePPM("frames/mirrors/" + std::to_string((int) frameIndex-93) + ".ppm");
+        cout << "finished frame: " << frameIndex << endl;}
         frameIndex++;
-        cout << "finished frame: " << frameIndex << endl;
+
     }
 
     /*for(float i = 0; i < 5 * 3; i++){
@@ -406,15 +408,18 @@ int main(int argc, char *argv[]) {
     for(float i = 0; i < 4/0.125f; i++){
         camera.moveCamera(Direction::rotateX, glm::radians(1.5f * .125f));
         camera.moveCamera(Direction::up, 0.1f * .125f);
+        if(frameIndex >= 93){
         draw(index);
         window.renderFrame();
-        window.savePPM("frames/mirrors/" + std::to_string((int) frameIndex) + ".ppm");
-        frameIndex++;
+        window.savePPM("frames/mirrors/" + std::to_string((int) frameIndex - 93) + ".ppm");
         cout << "finished frame: " << frameIndex << endl;
+        }
+        frameIndex++;
+
     }
 
     for(int i = 0; i < pauseTime * 2; i++){
-        window.savePPM("frames/mirrors/" + std::to_string((int) frameIndex) + ".ppm");
+        window.savePPM("frames/mirrors/" + std::to_string((int) frameIndex - 93) + ".ppm");
         frameIndex++;
         cout << "finished frame: " << frameIndex << endl;
     }
