@@ -382,15 +382,15 @@ int main(int argc, char *argv[]) {
     int frameIndex = 0;
     draw(index);
     window.renderFrame();
-    for(int i = 0; i < pauseTime; i++){
+    for(int i = 0; i < pauseTime * 2; i++){
         window.savePPM("frames/mirrors/" + std::to_string((int) frameIndex) + ".ppm");
         frameIndex++;
         cout << "finished frame: " << frameIndex << endl;
     }
 
-    for(float i = 0; i < 16 * 3;i++){
-        camera.moveCamera(Direction::forwards, -.049f);
-        camera.moveCamera(Direction::rotateY, glm::radians(1.0f));
+    for(float i = 0; i < 16 * 3 * 2;i++){
+        camera.moveCamera(Direction::forwards, -.049f * .5f);
+        camera.moveCamera(Direction::rotateY, glm::radians(1.0f * .5f));
 
         draw(index);
         window.renderFrame();
@@ -403,9 +403,9 @@ int main(int argc, char *argv[]) {
         camera.moveCamera
     }*/
 
-    for(float i = 0; i < 4/0.25f; i++){
-        camera.moveCamera(Direction::rotateX, glm::radians(1.5f * .25f));
-        camera.moveCamera(Direction::up, 0.1f * .25f);
+    for(float i = 0; i < 4/0.125f; i++){
+        camera.moveCamera(Direction::rotateX, glm::radians(1.5f * .125f));
+        camera.moveCamera(Direction::up, 0.1f * .125f);
         draw(index);
         window.renderFrame();
         window.savePPM("frames/mirrors/" + std::to_string((int) frameIndex) + ".ppm");
@@ -413,7 +413,7 @@ int main(int argc, char *argv[]) {
         cout << "finished frame: " << frameIndex << endl;
     }
 
-    for(int i = 0; i < pauseTime; i++){
+    for(int i = 0; i < pauseTime * 2; i++){
         window.savePPM("frames/mirrors/" + std::to_string((int) frameIndex) + ".ppm");
         frameIndex++;
         cout << "finished frame: " << frameIndex << endl;
