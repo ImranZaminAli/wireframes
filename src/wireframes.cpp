@@ -276,21 +276,22 @@ int main(int argc, char *argv[]) {
 
     /// lighting
     //cout << 0.4 / 0.02 << endl;
-    /*mode = DrawMode::rayTrace;
+    mode = DrawMode::rayTrace;
     int lightMoved = (int) (0.4/0.01);
-
+    draw();
+    window.renderFrame();
     for(int i = 0; i < pauseTime + pauseTime + lightMoved; i++){
-        draw();
-        window.renderFrame();
+        
 
         if(i >= pauseTime && i < pauseTime + lightMoved){
             window.clearPixels();
             rayTracer.lightPoint.x += 0.01;
             draw( index);
+            window.renderFrame();
         }
-        window.savePPM("frames/lighting/" + std::to_string((int) i) + ".ppm");
+        window.savePPM("frames/shadows/" + std::to_string((int) i) + ".ppm");
         cout << "finished frame: " << i << endl;
-    }*/
+    }
     /*for(int i = 0; i < )
     for(int i = ; i <= (int) (0.4/0.01) + 25; i++){
         draw(window);
@@ -319,7 +320,7 @@ int main(int argc, char *argv[]) {
     //window.renderFrame();
 
     ///bumpMaps
-    mode = DrawMode::rayTrace;
+    /*mode = DrawMode::rayTrace;
     camera.moveCamera(Direction::rotateX, glm::radians(21.0f));
     draw(index);
     window.renderFrame();
@@ -339,7 +340,7 @@ int main(int argc, char *argv[]) {
         }
         window.savePPM("frames/bumpMaps/" + std::to_string((int) i) + ".ppm");
         cout << "finished frame: " << i << endl;
-    }
+    }*/
 
     ///textureMaps
     /*mode = DrawMode::rayTrace;
@@ -353,8 +354,8 @@ int main(int argc, char *argv[]) {
         cout << "finished frame: " << i << endl;
     }*/
 
-    /*draw(index);
-    window.renderFrame();*/
+    //draw(index);
+    //window.renderFrame();
 	//window.renderFrame();
     //window.savePPM("output.ppm");
 
