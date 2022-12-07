@@ -46,9 +46,10 @@ Parser::Parser() {
 	//ifstream objStream("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\textured-cornell-box.obj");
 	//ifstream objStream("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\textured-cornell-box.obj", ifstream::binary);
 	//ifstream objStream("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\sphere.obj", ifstream::binary);
-	ifstream objStream("textured-cornell-box.obj", ifstream::binary);
-	
-	//readObj("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\textured-cornell-box.obj", 1.0f);
+	//ifstream objStream("textured-cornell-box.obj", ifstream::binary);
+    ifstream objStream("glass-cube.obj", ifstream::binary);
+
+    //readObj("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\textured-cornell-box.obj", 1.0f);
 	//readObj("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\untitled.obj", 1.0f);
 	//readObj("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\untitled.obj", 1.0f);
 	//readObj("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\sphere.obj", 1.0f);
@@ -100,11 +101,14 @@ Parser::Parser() {
 	objStream.clear();
 	objStream.seekg(0);
     int index = 0;
+    string object;
 	while (getline(objStream, nextLine)) {
 
 		auto tokens = split(nextLine, ' ');
-
-		if (tokens[0] == "f") {
+        if(tokens[0] == "o"){
+            object = tokens[1];
+        }
+		else if (tokens[0] == "f") {
 			vector<glm::vec3> vertexNorms;
 			vector<glm::vec3> corners;
 			vector<TexturePoint> textureCoords;
@@ -127,6 +131,7 @@ Parser::Parser() {
 				tri.texturePoints[1] = textureCoords[1];
 				tri.texturePoints[2] = textureCoords[2];
 			}
+            tri.objName = object;
 			triangles.push_back(tri);
 
 

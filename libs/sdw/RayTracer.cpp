@@ -206,7 +206,7 @@ float RayTracer::fresnel(glm::vec3& rayDir, glm::vec3 n, float rf) {
 std::pair<Colour, float> RayTracer::trace(glm::vec3& rayDir, glm::vec3 start, glm::vec3 lightPos, int bounce, bool debug, bool specular) {
 
 	if (bounce > maxBounces) {
-		std::cout << "acheived\n";
+		//std::cout << "acheived\n";
 		return std::make_pair(Colour(255, 255, 255), 1.0f);
 	}
 	RayTriangleIntersection rayData;
@@ -214,8 +214,8 @@ std::pair<Colour, float> RayTracer::trace(glm::vec3& rayDir, glm::vec3 start, gl
 	getClosestIntersection(rayDir, rayData, pointNormal, start, true);
 
 	if (rayData.distanceFromCamera == INFINITY) {
-		//return std::make_pair(Colour(0,0,0), 0.0f);
-        rayDir = glm::normalize(rayDir);
+		return std::make_pair(Colour(0,0,0), 0.0f);
+        /*rayDir = glm::normalize(rayDir);
         float m = 2.0f * sqrt( pow(rayDir.x, 2) + pow(rayDir.y , 2) + pow(rayDir.z + 1, 2));
         float u = ((rayDir.x / m) + 0.5f) * envMap.width;
         float v = ((rayDir.y / m) + 0.5f) * envMap.height;
@@ -229,7 +229,7 @@ std::pair<Colour, float> RayTracer::trace(glm::vec3& rayDir, glm::vec3 start, gl
         uint32_t red = (argb & 0x00FF0000) >> 16;
         uint32_t green = (argb & 0x0000FF00) >> 8;
         uint32_t blue = (argb & 0x000000FF);
-        return std::make_pair(Colour(red,blue,green), 1.0f);
+        return std::make_pair(Colour(red,blue,green), 1.0f);*/
 	}
 	else if (rayData.intersectedTriangle.colour.mirror) {
 		glm::vec3 reflectRay = glm::normalize(glm::reflect(glm::normalize(rayDir), pointNormal));

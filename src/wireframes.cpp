@@ -379,6 +379,9 @@ int main(int argc, char *argv[]) {
 
 
     //window.savePPM("output.ppm");
+
+    /// mirrors
+    /*
     int frameIndex = 0;
     draw(index);
     window.renderFrame();
@@ -403,7 +406,7 @@ int main(int argc, char *argv[]) {
 
     /*for(float i = 0; i < 5 * 3; i++){
         camera.moveCamera
-    }*/
+    }
 
     for(float i = 0; i < 4/0.125f; i++){
         camera.moveCamera(Direction::rotateX, glm::radians(1.5f * .125f));
@@ -422,6 +425,38 @@ int main(int argc, char *argv[]) {
         window.savePPM("frames/mirrors/" + std::to_string((int) frameIndex - 93) + ".ppm");
         frameIndex++;
         cout << "finished frame: " << frameIndex << endl;
+    }*/
+
+    //draw(index);
+    //window.renderFrame();
+    float angle = 0.5f;
+    float sin = std::sin(glm::radians(angle));
+    float cos = std::cos(glm::radians(angle));
+    glm::mat3 rotateX = glm::mat3(glm::vec3(1,0,0),
+                                 glm::vec3(0, cos, sin),
+                                 glm::vec3(0, -sin, cos));
+
+    glm::mat3 rotateY = glm::mat3(glm::vec3(cos, 0, -sin),
+                                  glm::vec3(0,1,0),
+                                  glm::vec3(sin, 0, cos));
+    for(float i = 0; i < 30.f/angle; i++){
+        for(int j = 0; j < parser.triangles.size(); j++){
+            if(parser.triangles[j].objName != "short_box")
+                continue;
+            for(int k = 0; k < parser.triangles[j].vertices.size();k++){
+                parser.triangles[j].vertices[k] = parser.triangles[j].vertices[k] * rotateX * rotateY;
+                parser.triangles[j].vertexNormals[k] = parser.triangles[j].vertexNormals[k] * rotateX * rotateY;
+                //parser.triangles[j].vertexNormals[k] = glm::normalize(parser.triangles[j].vertexNormals[k]);
+            }
+
+
+        }
+
+        draw(index);
+        window.renderFrame();
+        window.savePPM("frames/glass/" + std::to_string((int) i) + ".ppm");
+        window.clearPixels();
+        cout << "finished frame: " << i << endl;
     }
 
     cout << "FINISHED\n";
