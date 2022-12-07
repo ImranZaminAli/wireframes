@@ -439,7 +439,7 @@ int main(int argc, char *argv[]) {
     glm::mat3 rotateY = glm::mat3(glm::vec3(cos, 0, -sin),
                                   glm::vec3(0,1,0),
                                   glm::vec3(sin, 0, cos));
-    for(float i = 0; i < 30.f/angle; i++){
+    for(float i = 0; i < 60.f/angle; i++){
         for(int j = 0; j < parser.triangles.size(); j++){
             if(parser.triangles[j].objName != "short_box")
                 continue;
