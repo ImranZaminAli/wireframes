@@ -237,10 +237,10 @@ std::pair<Colour, float> RayTracer::trace(glm::vec3& rayDir, glm::vec3 start, gl
 	}
 	else if (rayData.intersectedTriangle.colour.glass) {
 		rayDir = glm::normalize(rayDir);
-		float kr = fresnel(rayDir, pointNormal, 1.5);
+		float kr = fresnel(rayDir, pointNormal, 1.3);
 		std::pair<Colour, float> refractValues;
 		if (kr < 1.0f) {
-			glm::vec3 refractRay = glm::normalize(refract(rayDir, pointNormal, 1.5));
+			glm::vec3 refractRay = glm::normalize(refract(rayDir, pointNormal, 1.3));
 			refractValues = trace((refractRay), rayData.intersectionPoint, lightPos, bounce + 1, debug, false);
 		}
 		glm::vec3 reflectRay = glm::normalize(glm::reflect(rayDir, pointNormal));

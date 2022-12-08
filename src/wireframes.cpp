@@ -429,7 +429,7 @@ int main(int argc, char *argv[]) {
 
     //draw(index);
     //window.renderFrame();
-    float angle = 0.5f;
+    /*float angle = 0.5f;
     float sin = std::sin(glm::radians(angle));
     float cos = std::cos(glm::radians(angle));
     glm::mat3 rotateX = glm::mat3(glm::vec3(1,0,0),
@@ -457,7 +457,43 @@ int main(int argc, char *argv[]) {
         window.savePPM("frames/glass/" + std::to_string((int) i) + ".ppm");
         window.clearPixels();
         cout << "finished frame: " << i << endl;
+    }*/
+
+    camera.moveCamera(Direction::forwards, -.4);
+    camera.moveCamera(Direction::rotateY, -glm::radians(17.f));
+    camera.moveCamera(Direction::rotateX, glm::radians(7.f));
+    float sin = std::sin(glm::radians(0.75));
+    float cos = std::cos(glm::radians(0.75));
+    glm::mat3 rotateX = glm::mat3(glm::vec3(1,0,0),
+                                  glm::vec3(0, cos, sin),
+                                  glm::vec3(0, -sin, cos));
+
+    glm::mat3 rotateY = glm::mat3(glm::vec3(cos, 0, -sin),
+                                  glm::vec3(0,1,0),
+                                  glm::vec3(sin, 0, cos));
+    //camera.moveCamera(Direction::
+   for(float i = 0; i < 20 / 0.5f + 30 / 0.75f; i++){
+        draw(index);
+        window.renderFrame();
+        if(i < 30 / 0.75f){
+       for(int j = 0; j < parser.triangles.size(); j++){
+       if(parser.triangles[j].objName != "short_box")
+           continue;
+       for(int k = 0; k < parser.triangles[j].vertices.size();k++){
+           parser.triangles[j].vertices[k] = parser.triangles[j].vertices[k] * rotateY;
+           //parser.triangles[j].vertexNormals[k] = parser.triangles[j].vertexNormals[k] * rotateX * rotateY;
+           //parser.triangles[j].vertexNormals[k] = glm::normalize(parser.triangles[j].vertexNormals[k]);
+       }}}
+        else{
+            camera.moveCamera(Direction::rotateX, glm::radians(.5f));
+        }
+
+       window.savePPM("frames/glass/" + std::to_string((int) i) + ".ppm");
+       cout << "finished frame " << i << endl;
     }
+
+    draw(index);
+    window.renderFrame();
 
     cout << "FINISHED\n";
 	while (true) {
