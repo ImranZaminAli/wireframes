@@ -9,10 +9,10 @@ RayTracer::RayTracer(int windowWidth, int windowHeight) {
 	//lightPoint = glm::vec3(0,0.4,2);
 	//lightPoint = glm::vec3(0.2f, 1.2f, 2.0f);
     //
-    lightPoint = glm::vec3(0.0f, 0.3f, 0.2f);
+    //lightPoint = glm::vec3(0.0f, 0.3f, 0.2f);
 
 	//lightPoint = glm::vec3(0.0f, 0.2f, 0.5f);
-    //lightPoint = glm::vec3(-0.05f, -0.05f, .75f);
+    lightPoint = glm::vec3(-0.05f, -0.05f, .75f);
 	black = 0xFF000000;
 	sourceStrength = 2.0f;
 	maxBounces = 20;
