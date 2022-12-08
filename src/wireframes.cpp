@@ -460,7 +460,7 @@ int main(int argc, char *argv[]) {
     }*/
 
     ///glass
-    /*camera.moveCamera(Direction::forwards, -.4);
+    camera.moveCamera(Direction::forwards, -.4);
     camera.moveCamera(Direction::rotateY, -glm::radians(17.f));
     camera.moveCamera(Direction::rotateX, glm::radians(7.f));
     float sin = std::sin(glm::radians(0.75));
@@ -478,7 +478,7 @@ int main(int argc, char *argv[]) {
         window.renderFrame();
         if(i < 30 / 0.75f){
        for(int j = 0; j < parser.triangles.size(); j++){
-       if(parser.triangles[j].objName != "short_box")
+       if(parser.triangles[j].objName != "tall_box")
            continue;
        for(int k = 0; k < parser.triangles[j].vertices.size();k++){
            parser.triangles[j].vertices[k] = parser.triangles[j].vertices[k] * rotateY;
@@ -491,13 +491,13 @@ int main(int argc, char *argv[]) {
 
        window.savePPM("frames/glass/" + std::to_string((int) i) + ".ppm");
        cout << "finished frame " << i << endl;
-    }*/
-    draw(index);
+    }
+    /*draw(index);
     window.renderFrame();
     for(int i = 0;i < 25; i++){
 
         window.savePPM("frames/sphere/" + std::to_string((int) i) + ".ppm");
-    }
+    }*/
 
     draw(index);
     window.renderFrame();

@@ -46,7 +46,7 @@ Parser::Parser() {
 	//ifstream objStream("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\textured-cornell-box.obj");
 	//ifstream objStream("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\textured-cornell-box.obj", ifstream::binary);
 	//ifstream objStream("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\sphere.obj", ifstream::binary);
-	ifstream objStream("spheres.obj", ifstream::binary);
+	ifstream objStream("textured-cornell-box.obj", ifstream::binary);
     //ifstream objStream("glass-cube.obj", ifstream::binary);
 
     //readObj("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\textured-cornell-box.obj", 1.0f);
