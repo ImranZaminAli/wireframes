@@ -459,7 +459,8 @@ int main(int argc, char *argv[]) {
         cout << "finished frame: " << i << endl;
     }*/
 
-    camera.moveCamera(Direction::forwards, -.4);
+    ///glass
+    /*camera.moveCamera(Direction::forwards, -.4);
     camera.moveCamera(Direction::rotateY, -glm::radians(17.f));
     camera.moveCamera(Direction::rotateX, glm::radians(7.f));
     float sin = std::sin(glm::radians(0.75));
@@ -490,6 +491,12 @@ int main(int argc, char *argv[]) {
 
        window.savePPM("frames/glass/" + std::to_string((int) i) + ".ppm");
        cout << "finished frame " << i << endl;
+    }*/
+    draw(index);
+    window.renderFrame();
+    for(int i = 0;i < 25; i++){
+
+        window.savePPM("frames/sphere/" + std::to_string((int) i) + ".ppm");
     }
 
     draw(index);

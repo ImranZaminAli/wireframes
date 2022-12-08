@@ -8,13 +8,17 @@ RayTracer::RayTracer(int windowWidth, int windowHeight) {
 	//lightPoint = glm::vec3(0.2f, 0.7f, 0.3f);
 	//lightPoint = glm::vec3(0,0.4,2);
 	//lightPoint = glm::vec3(0.2f, 1.2f, 2.0f);
-	lightPoint = glm::vec3(0.0f, 0.35f, 0.0f);
+    //
+    // lightPoint = glm::vec3(0.0f, 0.3f, 0.2f);
+
 	//lightPoint = glm::vec3(0.0f, 0.2f, 0.5f);
+    lightPoint = glm::vec3(-0.05f, -0.05f, .75f);
 	black = 0xFF000000;
 	sourceStrength = 2.0f;
 	maxBounces = 20;
     incidentStrength = 1.3;
-    proximityStrength = 2.5f;
+    //proximityStrength = 2.5f;
+    proximityStrength = 1.f;
 	//textureMap = TextureMap("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\metalTexture.ppm");
 	//normalMap = TextureMap("C:\\Users\\izami\\Documents\\UoBYr3\\wireframes\\metalNorm.ppm");
     normalMap = TextureMap("brickwall_normal.ppm");
@@ -149,7 +153,7 @@ glm::vec3 RayTracer::getReflectedRay(glm::vec3& incidentRay, glm::vec3& normal) 
 float RayTracer::calculateIntensity(float distance, glm::vec3 cameraRay, glm::vec3 shadowRay, glm::vec3 viewRay, ModelTriangle& tri, glm::vec3 pointNormal, bool& specular) {
 	//glm::vec3 reflectedRay = glm::normalize(shadowRay - 2.0f * pointNormal * glm::dot(shadowRay,pointNormal));
 	glm::vec3 reflectedRay = glm::reflect(glm::normalize(shadowRay), pointNormal);
-	float specularIntensity = powf(std::fmaxf(0.0f,glm::dot(reflectedRay, viewRay)), 160);
+	float specularIntensity = powf(std::fmaxf(0.0f,glm::dot(reflectedRay, viewRay)), 256);
 	
 	float inidenceAngle = glm::dot(shadowRay, pointNormal);
 	//float proximityStrength = 3.0f; //1.5
@@ -368,7 +372,7 @@ void RayTracer::drawRayTracedImage(DrawingWindow* window, std::vector<ModelTrian
 				colour = colourVal.first;
 				intensity += colourVal.second;
 			}
-			window->setPixelColour(j,i,colour.getArbg(std::fmaxf( intensity/lights.size(), 0.23f)));
+			window->setPixelColour(j,i,colour.getArbg(std::fmaxf( intensity/lights.size(), 0.4f)));
 		}
 	}
 
